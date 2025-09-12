@@ -7,8 +7,21 @@ app = Flask(__name__)
 
 #connect to the DB
 #let Joseph know if the database can't connect, the IP probably changed
+
+#Default Admin Account:
+user: str = "asset_admin"
+password: str = "CapstoneII"
+db_name: str = "asset_management"
+host: str = "47.199.71.84"
+port: int = 3306
+
+db_link: str = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
+
+print(db_link)
+
 #TODO this needs to be obscured and changed later for security purposes
-app.config["SQLALCHEMY_DATABASE_URI"] = "mysql+pymysql://flaskuser:testpassword@47.199.71.84:3306/flaskdb"
+#TODO we need to dynamically swap this to admin or user accounts
+app.config["SQLALCHEMY_DATABASE_URI"] = db_link
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
@@ -16,16 +29,18 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db = SQLAlchemy(app)
 
 # Create model to use DB from
-class User(db.Model):
-    __tablename__ = "test_users"
-    id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.String(50))
+class Asset(db.Model):
+    __tablename__ = "assets"
+    asset_id = db.Column(db.Integer, primary_key=True)
+    asset_tag = db.Column(db.String(100), unique=True, nullable=False)
+    name = db.Column(db.String(150), nullable=False)
+    description = db.Column(db.Text)
 
 # Defines the file structure of the app and binds the files/pages to objects
 @app.route('/')
 def index():
-    users = User.query.all()
-    output ="<br>".join(f"{user.id}: {user.name}" for user in users)
+    assets = Asset.query.all()
+    output ="<br>".join(f"{assets.id}: {assets.name}" for asset in assets)
 
     return "<h1> Hello World! </h1>" + output
 
