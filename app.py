@@ -87,8 +87,8 @@ def create_asset():
 @app.route("/assets/show", methods=["GET"])
 def show_asset():
     # Query all assets
-    assets = Asset.query.order_by(Asset.asset_id).all()
-    return render_template("show_assets.html", assets=assets)
+    asset_query = Asset.query.order_by(Asset.asset_id).all()
+    return render_template("show_assets.html", assets=asset_query)
 
 @app.route("/assets/delete/<int:asset_id>", methods=["GET", "POST"])
 def delete_asset(asset_id):
