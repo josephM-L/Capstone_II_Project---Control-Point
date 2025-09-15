@@ -1,45 +1,54 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8" />
-<title>Add Asset</title>
-<!-- <link rel="stylesheet" href=""> -->
-</head>
-<body>
-<h4><a href="/">Home</a></h4>
-<main>
-  <h1>Add Asset</h1>
+{% extends "base.html" %}
 
+{% block title %}Add Asset{% endblock %}
+{% block content %}
+<h1>Add Asset</h1>
+
+<--! Flash message -->
+  
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       {% for category, msg in messages %}
-        <div class="flash {{ category }}">{{ msg }}</div>
+        <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
       {% endfor %}
     {% endif %}
   {% endwith %}
 
-  <form method="post">
-    <label for="asset_tag">Asset Tag *</label>
-    <input id="asset_tag" name="asset_tag" required />
+  <form method="post" class="mt-3">
+    <div class="mb-3">
+      <label for="asset_tag">Asset Tag *</label>
+      <input id="asset_tag" name="asset_tag" class= "form-control" required>
+    </div>
 
-    <label for="name">Name *</label>
-    <input id="name" name="name" required />
+    <div class="mb-3">
+      <label for="name" class="form-label">Name *</label>
+      <input id="name" name="name" class="form-control" required>
+    </div>  
 
-    <label for="description">Description</label>
-    <textarea id="description" name="description"></textarea>
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" name="description" class="form-control"></textarea>
+    </div>  
 
-    <label for="purchase_date">Purchase Date</label>
-    <input id="purchase_date" name="purchase_date" type="date" />
-
-    <label for="purchase_cost">Purchase Cost</label>
-    <input id="purchase_cost" name="purchase_cost" type="number" step="0.01" />
-
-    <label for="serial_number">Serial Number</label>
-    <input id="serial_number" name="serial_number" />
-
-    <button type="submit">Add Asset</button>
+    <div class="mb-3">
+      <label for="purchase_date">Purchase Date</label>
+      <input id="purchase_date" name="purchase_date" type="date" class="form-control">
+    </div>
+      
+    <div class="mb-3">
+      <label for="purchase_cost">Purchase Cost</label>
+      <input id="purchase_cost" name="purchase_cost" type="number" step="0.01" class="form-control">
+    </div>  
+      
+    <div class="mb-3">
+      <label for="serial_number">Serial Number</label>
+      <input id="serial_number" name="serial_number" class="form-control">
+    </div>  
+      
+    <button type="submit" class="btn btn-success">Add Asset</button>
+    <a href="/assets/show" class="btn btn-primary ms-2">Display assets</a>
   </form>
-    <p><a href="/assets/show">Display assets</a></p>
-</main>
-</body>
+{% endblock %}
 </html>
