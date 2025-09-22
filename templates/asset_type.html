@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Asset Types{% endblock %}
+{% block content %}
+
+<h1>Add Asset Type</h1>
+  
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, msg in messages %}
+        <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
+ <form method="post" class="mt-3">
+    <div class="mb-3">
+      <label for="name" class="form-label">Name *</label>
+      <input id="name" name="name" class="form-control" required>
+    </div>
+
+    <div class="mb-3">
+      <label for="category" class="form-label">Category *</label>
+      <select id="category" name="category" class="form-control" required>
+        <option value="Tangible">Tangible</option>
+        <option value="Intangible">Intangible</option>
+      </select>
+    </div>
+
+    <div class="mb-3">
+      <label for="description" class="form-label">Description</label>
+      <textarea id="description" name="description" class="form-control"></textarea>
+    </div>
+
+    <button type="submit" class="btn btn-success">Add Asset Type</button>
+  </form>
+<p></p>
+<h2>Existing Asset Types</h2>
+<table>
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Category</th>
+      <th>Description</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for asset_type in asset_types %}
+    <tr>
+      <td>{{ asset_type.asset_type_id }}</td>
+      <td>{{ asset_type.name }}</td>
+      <td>{{ asset_type.category }}</td>
+      <td>{{ asset_type.description or "" }}</td>
+      <td>
+        <a href="/asset_type/delete/{{ asset_type.asset_type_id }}" class="btn btn-primary ms-2">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
