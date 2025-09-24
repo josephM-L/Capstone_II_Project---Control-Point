@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}Hello Flask{% endblock %}
+{% block title %}Home{% endblock %}
 {% block content %}
 
     <h1>Hello, World!</h1>
 
-<p><a href="/assets/show">Display assets</a></p>
-<p><a href="/assets/new">Add a new asset</a></p>
-<p><a href="/asset_type">Asset Types</a></p>
+<p><a href="{{ url_for('assets.assets') }}">Manage Assets</a></p>
 {% endblock %}

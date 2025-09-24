@@ -1,0 +1,16 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
+  <div class="container d-flex justify-content-center">
+    <ul class="navbar-nav d-flex flex-row w-100" style="justify-content: space-evenly;">
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('assets.assets') }}">Assets</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_type.asset_types') }}">Asset Types</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_status.asset_statuses') }}">Asset Statuses</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('location.locations') }}">Locations</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('vendor.vendors') }}">Vendors</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('department.departments') }}">Departments</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('employee.employees') }}">Employees</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_assignment.asset_assignments') }}">Assignments</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_maintenance.asset_maintenance') }}">Maintenance</a></li>
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_disposal.asset_disposals') }}">Disposals</a></li>
+    </ul>
+  </div>
+</nav>

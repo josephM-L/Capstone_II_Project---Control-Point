@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block title %}Locations{% endblock %}
+
+{% block content %}
+
+{% block subnav %}
+{% include "subnav.html" %}
+{% endblock %}
+
+<h1>Add Location</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="post" class="mt-3">
+  <div class="mb-3">
+    <label for="name" class="form-label">Location Name *</label>
+    <input id="name" name="name" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="address" class="form-label">Address</label>
+    <input id="address" name="address" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="city" class="form-label">City</label>
+    <input id="city" name="city" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="country" class="form-label">Country</label>
+    <input id="country" name="country" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-success">Add Location</button>
+</form>
+
+<p></p>
+
+<h2>Existing Locations</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Address</th>
+      <th>City</th>
+      <th>Country</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for location in locations %}
+    <tr>
+      <td>{{ location.location_id }}</td>
+      <td>{{ location.name }}</td>
+      <td>{{ location.address or "" }}</td>
+      <td>{{ location.city or "" }}</td>
+      <td>{{ location.country or "" }}</td>
+      <td>
+        <a href="/locations/delete/{{ location.location_id }}" class="btn btn-primary ms-2">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

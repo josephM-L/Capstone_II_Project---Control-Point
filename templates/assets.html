@@ -1,7 +1,10 @@
 {% extends "base.html" %}
-
 {% block title %}Add Asset{% endblock %}
 {% block content %}
+
+{% block subnav %}
+{% include "subnav.html" %}
+{% endblock %}
 
 <h1>Add Asset</h1>
   
@@ -45,6 +48,38 @@
     </div>  
       
     <button type="submit" class="btn btn-success">Add Asset</button>
-    <a href="/assets/show" class="btn btn-primary ms-2">Display assets</a>
   </form>
+
+<p></p>
+
+ <h1>All Assets</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Tag</th>
+        <th>Name</th>
+        <th>Description</th>
+        <th>Purchase Date</th>
+        <th>Cost</th>
+        <th>Serial Number</th>
+      </tr>
+    </thead>
+       <tbody>
+      {% for asset in assets %}
+      <tr>
+        <td>{{ asset.asset_id }}</td>
+        <td>{{ asset.asset_tag }}</td>
+        <td>{{ asset.name }}</td>
+        <td>{{ asset.description or "" }}</td>
+        <td>{{ asset.purchase_date or "" }}</td>
+        <td>{{ asset.purchase_cost or "" }}</td>
+        <td>{{ asset.serial_number or "" }}</td>
+        <td>
+            <a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-primary ms-2">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
 {% endblock %}

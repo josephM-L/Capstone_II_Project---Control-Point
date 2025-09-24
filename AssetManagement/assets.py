@@ -4,8 +4,8 @@ from models import db, Asset
 
 assets_bp = Blueprint("assets", __name__)
 
-@assets_bp.route("/assets/new", methods=["GET", "POST"])
-def create_asset():
+@assets_bp.route("/assets", methods=["GET", "POST"])
+def assets():
     if request.method == "POST":
         asset_tag = request.form.get("asset_tag", "").strip()
         name = request.form.get("name", "").strip()
@@ -16,7 +16,7 @@ def create_asset():
 
         if not asset_tag or not name:
             flash("Asset tag and name are required!", "danger")
-            return redirect("/assets/new")
+            return redirect("/assets")
 
         try:
             purchase_date_parsed = datetime.strptime(purchase_date, "%Y-%m-%d").date() if purchase_date else None
@@ -34,19 +34,15 @@ def create_asset():
             db.session.add(new_asset)
             db.session.commit()
             flash("Asset added successfully!", "success")
-            return redirect("/assets/new")
+            return redirect("/assets")
         except Exception as e:
             db.session.rollback()
             flash(f"Error: {e}", "danger")
-            return redirect("/assets/new")
+            return redirect("/assets")
 
-    return render_template("add_asset.html")
-
-@assets_bp.route("/assets/show", methods=["GET"])
-def show_asset():
     # Query all assets
     asset_query = Asset.query.order_by(Asset.asset_id).all()
-    return render_template("show_assets.html", assets=asset_query)
+    return render_template("assets.html", assets=asset_query)
 
 @assets_bp.route("/assets/delete/<int:asset_id>", methods=["GET", "POST"])
 def delete_asset(asset_id):
@@ -54,4 +50,4 @@ def delete_asset(asset_id):
     if asset:
         db.session.delete(asset)
         db.session.commit()
-    return redirect("/assets/show")
+    return redirect("/assets")

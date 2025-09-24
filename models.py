@@ -3,6 +3,7 @@ from datetime import datetime
 
 db = SQLAlchemy()
 
+
 class AssetType(db.Model):
     __tablename__ = "asset_types"
     asset_type_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
@@ -10,11 +11,15 @@ class AssetType(db.Model):
     category = db.Column(db.Enum("Tangible", "Intangible"), nullable=False)
     description = db.Column(db.Text)
 
+    assets = db.relationship("Asset", back_populates="asset_type", cascade="all, delete-orphan")
+
 
 class AssetStatus(db.Model):
     __tablename__ = "asset_statuses"
     status_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     status_name = db.Column(db.String(50), nullable=False)
+
+    assets = db.relationship("Asset", back_populates="status", cascade="all, delete-orphan")
 
 
 class Department(db.Model):
@@ -22,6 +27,13 @@ class Department(db.Model):
     department_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     name = db.Column(db.String(100), nullable=False)
     manager_id = db.Column(db.Integer, db.ForeignKey("employees.employee_id"))
+
+    employees = db.relationship(
+        "Employee",
+        back_populates="department",
+        cascade="all, delete-orphan",
+        foreign_keys="[Employee.department_id]"
+    )
 
 
 class Employee(db.Model):
@@ -35,6 +47,15 @@ class Employee(db.Model):
     role = db.Column(db.String(100))
     status = db.Column(db.Enum("Active", "Inactive"), default="Active")
 
+    department = db.relationship(
+        "Department",
+        back_populates="employees",
+        foreign_keys=[department_id]
+    )
+
+    assignments = db.relationship("AssetAssignment", back_populates="employee", cascade="all, delete-orphan")
+    assigned_assets = db.relationship("Asset", back_populates="assigned_employee")
+
 
 class Location(db.Model):
     __tablename__ = "locations"
@@ -43,6 +64,8 @@ class Location(db.Model):
     address = db.Column(db.String(255))
     city = db.Column(db.String(100))
     country = db.Column(db.String(100))
+
+    assets = db.relationship("Asset", back_populates="location", cascade="all, delete-orphan")
 
 
 class Vendor(db.Model):
@@ -53,6 +76,8 @@ class Vendor(db.Model):
     phone = db.Column(db.String(50))
     email = db.Column(db.String(150))
     address = db.Column(db.String(255))
+
+    assets = db.relationship("Asset", back_populates="vendor", cascade="all, delete-orphan")
 
 
 class Asset(db.Model):
@@ -73,6 +98,15 @@ class Asset(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
+    asset_type = db.relationship("AssetType", back_populates="assets")
+    status = db.relationship("AssetStatus", back_populates="assets")
+    location = db.relationship("Location", back_populates="assets")
+    vendor = db.relationship("Vendor", back_populates="assets")
+    assigned_employee = db.relationship("Employee", back_populates="assigned_assets")
+
+    assignments = db.relationship("AssetAssignment", back_populates="asset", cascade="all, delete-orphan")
+    maintenances = db.relationship("AssetMaintenance", back_populates="asset", cascade="all, delete-orphan")
+    disposals = db.relationship("AssetDisposal", back_populates="asset", cascade="all, delete-orphan")
 
 
 class AssetAssignment(db.Model):
@@ -82,6 +116,9 @@ class AssetAssignment(db.Model):
     employee_id = db.Column(db.Integer, db.ForeignKey("employees.employee_id"))
     assigned_date = db.Column(db.Date, nullable=False)
     returned_date = db.Column(db.Date)
+
+    asset = db.relationship("Asset", back_populates="assignments")
+    employee = db.relationship("Employee", back_populates="assignments")
 
 
 class AssetMaintenance(db.Model):
@@ -94,6 +131,8 @@ class AssetMaintenance(db.Model):
     cost = db.Column(db.Numeric(12, 2))
     next_due_date = db.Column(db.Date)
 
+    asset = db.relationship("Asset", back_populates="maintenances")
+
 
 class AssetDisposal(db.Model):
     __tablename__ = "asset_disposals"
@@ -103,3 +142,5 @@ class AssetDisposal(db.Model):
     method = db.Column(db.Enum("Sold", "Recycled", "Scrapped", "Donated"), nullable=False)
     sale_value = db.Column(db.Numeric(12, 2))
     notes = db.Column(db.Text)
+
+    asset = db.relationship("Asset", back_populates="disposals")

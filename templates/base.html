@@ -11,15 +11,21 @@
     <a class="navbar-brand" href="/">Asset Manager</a>
       <ul class="navbar-nav flex-row">
         <li class="nav-item"><a class="nav-link px-2" href="/">Home</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/assets/new">Add Asset</a></li>
-        <li class="nav-item"><a class="nav-link px-2" href="/assets/show">View Assets</a></li>
+        <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('assets.assets') }}">Manage Assets</a></li>
       </ul>
   </div>
 </nav>
 
+
+
 <!-- Page Content -->
 <div class="container mt-4">
-    {% block content %}{% endblock %}
+    {% block content %}
+
+    <!-- Subnav Placeholder -->
+    {% block subnav %}{% endblock %}
+
+    {% endblock %}
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>

@@ -4,7 +4,7 @@ from models import db, AssetType
 asset_type_bp = Blueprint("asset_type", __name__)
 
 @asset_type_bp.route("/asset_type", methods=["GET", "POST"])
-def create_asset():
+def asset_types():
     if request.method == "POST":
         name = request.form.get("name", "").strip()
         category = request.form.get("category", "").strip()
@@ -35,7 +35,7 @@ def create_asset():
     return render_template("asset_type.html", asset_types=asset_type_query)
 
 @asset_type_bp.route("/asset_type/delete/<int:asset_type_id>", methods=["GET", "POST"])
-def delete_asset(asset_type_id):
+def delete_asset_type(asset_type_id):
     asset_type = AssetType.query.get(asset_type_id)
     if asset_type:
         db.session.delete(asset_type)

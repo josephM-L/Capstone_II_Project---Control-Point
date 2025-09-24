@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}Asset Assignments{% endblock %}
+
+{% block content %}
+
+{% block subnav %}
+{% include "subnav.html" %}
+{% endblock %}
+
+<h1>Assign Asset</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="post" class="mt-3">
+  <div class="mb-3">
+    <label for="asset_id" class="form-label">Asset *</label>
+    <select id="asset_id" name="asset_id" class="form-control" required>
+      {% for asset in assets %}
+      <option value="{{ asset.asset_id }}">{{ asset.asset_tag }} - {{ asset.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="employee_id" class="form-label">Employee *</label>
+    <select id="employee_id" name="employee_id" class="form-control" required>
+      {% for employee in employees %}
+      <option value="{{ employee.employee_id }}">{{ employee.first_name }} {{ employee.last_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <div class="mb-3">
+    <label for="assigned_date" class="form-label">Assigned Date *</label>
+    <input id="assigned_date" name="assigned_date" type="date" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="returned_date" class="form-label">Returned Date</label>
+    <input id="returned_date" name="returned_date" type="date" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-success">Assign Asset</button>
+</form>
+
+<p></p>
+
+<h2>Current Asset Assignments</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Asset</th>
+      <th>Employee</th>
+      <th>Assigned Date</th>
+      <th>Returned Date</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for assignment in assignments %}
+        <tr>
+          <td>{{ assignment.assignment_id }}</td>
+          <td>{{ assignment.asset.asset_tag }}</td>
+          <td>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</td>
+          <td>{{ assignment.assigned_date }}</td>
+          <td>{{ assignment.returned_date or "" }}</td>
+          <td>
+            <a href="/asset_assignments/delete/{{ assignment.assignment_id }}" class="btn btn-primary ms-2">Delete</a>
+          </td>
+        </tr>
+        {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

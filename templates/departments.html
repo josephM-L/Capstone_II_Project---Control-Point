@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Departments{% endblock %}
+
+{% block content %}
+
+{% block subnav %}
+{% include "subnav.html" %}
+{% endblock %}
+
+<h1>Add Department</h1>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="post" class="mt-3">
+  <div class="mb-3">
+    <label for="name" class="form-label">Department Name *</label>
+    <input id="name" name="name" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="manager_id" class="form-label">Manager ID</label>
+    <input id="manager_id" name="manager_id" type="number" class="form-control">
+  </div>
+
+  <button type="submit" class="btn btn-success">Add Department</button>
+</form>
+
+<p></p>
+
+<h2>Existing Departments</h2>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Manager ID</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for department in departments %}
+    <tr>
+      <td>{{ department.department_id }}</td>
+      <td>{{ department.name }}</td>
+      <td>{{ department.manager_id or "" }}</td>
+      <td>
+        <a href="/departments/delete/{{ department.department_id }}" class="btn btn-primary ms-2">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

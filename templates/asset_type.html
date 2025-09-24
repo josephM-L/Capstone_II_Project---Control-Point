@@ -3,6 +3,10 @@
 {% block title %}Asset Types{% endblock %}
 {% block content %}
 
+{% block subnav %}
+{% include "subnav.html" %}
+{% endblock %}
+
 <h1>Add Asset Type</h1>
   
   {% with messages = get_flashed_messages(with_categories=true) %}
@@ -36,7 +40,7 @@
   </form>
 <p></p>
 <h2>Existing Asset Types</h2>
-<table>
+<table class="table table-striped">
   <thead>
     <tr>
       <th>ID</th>
