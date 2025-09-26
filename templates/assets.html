@@ -8,78 +8,151 @@
 
 <h1>Add Asset</h1>
   
-  {% with messages = get_flashed_messages(with_categories=true) %}
-    {% if messages %}
-      {% for category, msg in messages %}
-        <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+{% with messages = get_flashed_messages(with_categories=true) %}
+  {% if messages %}
+    {% for category, msg in messages %}
+      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+    {% endfor %}
+  {% endif %}
+{% endwith %}
+
+<form method="post" class="mt-3">
+  <div class="mb-3">
+    <label for="asset_tag">Asset Tag *</label>
+    <input id="asset_tag" name="asset_tag" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="name" class="form-label">Name *</label>
+    <input id="name" name="name" class="form-control" required>
+  </div>
+
+  <div class="mb-3">
+    <label for="description" class="form-label">Description</label>
+    <textarea id="description" name="description" class="form-control"></textarea>
+  </div>
+
+  <div class="mb-3">
+    <label for="purchase_date">Purchase Date</label>
+    <input id="purchase_date" name="purchase_date" type="date" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="purchase_cost">Purchase Cost</label>
+    <input id="purchase_cost" name="purchase_cost" type="number" step="0.01" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="serial_number">Serial Number</label>
+    <input id="serial_number" name="serial_number" class="form-control">
+  </div>
+
+  <div class="mb-3">
+    <label for="warranty_expiry">Warranty Expiry</label>
+    <input id="warranty_expiry" name="warranty_expiry" type="date" class="form-control">
+  </div>
+
+  <!-- Dropdowns for relationships -->
+  <div class="mb-3">
+    <label for="asset_type_id">Asset Type</label>
+    <select id="asset_type_id" name="asset_type_id" class="form-control">
+      <option value="">-- Select Type --</option>
+      {% for t in asset_types %}
+        <option value="{{ t.asset_type_id }}">{{ t.name }}</option>
       {% endfor %}
-    {% endif %}
-  {% endwith %}
+    </select>
+  </div>
 
-  <form method="post" class="mt-3">
-    <div class="mb-3">
-      <label for="asset_tag">Asset Tag *</label>
-      <input id="asset_tag" name="asset_tag" class= "form-control" required>
-    </div>
+  <div class="mb-3">
+    <label for="status_id">Status</label>
+    <select id="status_id" name="status_id" class="form-control">
+      <option value="">-- Select Status --</option>
+      {% for s in statuses %}
+        <option value="{{ s.status_id }}">{{ s.status_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
-    <div class="mb-3">
-      <label for="name" class="form-label">Name *</label>
-      <input id="name" name="name" class="form-control" required>
-    </div>  
+  <div class="mb-3">
+    <label for="location_id">Location</label>
+    <select id="location_id" name="location_id" class="form-control">
+      <option value="">-- Select Location --</option>
+      {% for loc in locations %}
+        <option value="{{ loc.location_id }}">{{ loc.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
-    <div class="mb-3">
-      <label for="description" class="form-label">Description</label>
-      <textarea id="description" name="description" class="form-control"></textarea>
-    </div>  
+  <div class="mb-3">
+    <label for="vendor_id">Vendor</label>
+    <select id="vendor_id" name="vendor_id" class="form-control">
+      <option value="">-- Select Vendor --</option>
+      {% for v in vendors %}
+        <option value="{{ v.vendor_id }}">{{ v.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
 
-    <div class="mb-3">
-      <label for="purchase_date">Purchase Date</label>
-      <input id="purchase_date" name="purchase_date" type="date" class="form-control">
-    </div>
-      
-    <div class="mb-3">
-      <label for="purchase_cost">Purchase Cost</label>
-      <input id="purchase_cost" name="purchase_cost" type="number" step="0.01" class="form-control">
-    </div>  
-      
-    <div class="mb-3">
-      <label for="serial_number">Serial Number</label>
-      <input id="serial_number" name="serial_number" class="form-control">
-    </div>  
-      
-    <button type="submit" class="btn btn-success">Add Asset</button>
-  </form>
+  <div class="mb-3">
+    <label for="assigned_to">Assigned Employee</label>
+    <select id="assigned_to" name="assigned_to" class="form-control">
+      <option value="">-- Select Employee --</option>
+      {% for e in employees %}
+        <option value="{{ e.employee_id }}">{{ e.first_name }} {{ e.last_name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+
+  <button type="submit" class="btn btn-success">Add Asset</button>
+</form>
 
 <p></p>
 
- <h1>All Assets</h1>
-  <table class="table table-striped">
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>Tag</th>
-        <th>Name</th>
-        <th>Description</th>
-        <th>Purchase Date</th>
-        <th>Cost</th>
-        <th>Serial Number</th>
-      </tr>
-    </thead>
-       <tbody>
-      {% for asset in assets %}
-      <tr>
-        <td>{{ asset.asset_id }}</td>
-        <td>{{ asset.asset_tag }}</td>
-        <td>{{ asset.name }}</td>
-        <td>{{ asset.description or "" }}</td>
-        <td>{{ asset.purchase_date or "" }}</td>
-        <td>{{ asset.purchase_cost or "" }}</td>
-        <td>{{ asset.serial_number or "" }}</td>
-        <td>
-            <a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-primary ms-2">Delete</a>
-        </td>
-      </tr>
-      {% endfor %}
-    </tbody>
-  </table>
+<h1>All Assets</h1>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tag</th>
+      <th>Name</th>
+      <th>Description</th>
+      <th>Purchase Date</th>
+      <th>Cost</th>
+      <th>Serial Number</th>
+      <th>Warranty Expiry</th>
+      <th>Type</th>
+      <th>Status</th>
+      <th>Location</th>
+      <th>Vendor</th>
+      <th>Assigned To</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for asset in assets %}
+    <tr>
+      <td>{{ asset.asset_id }}</td>
+      <td>{{ asset.asset_tag }}</td>
+      <td>{{ asset.name }}</td>
+      <td>{{ asset.description or "" }}</td>
+      <td>{{ asset.purchase_date or "" }}</td>
+      <td>{{ asset.purchase_cost or "" }}</td>
+      <td>{{ asset.serial_number or "" }}</td>
+      <td>{{ asset.warranty_expiry or "" }}</td>
+      <td>{{ asset.asset_type.name if asset.asset_type else "" }}</td>
+      <td>{{ asset.status.status_name if asset.status else "" }}</td>
+      <td>{{ asset.location.name if asset.location else "" }}</td>
+      <td>{{ asset.vendor.name if asset.vendor else "" }}</td>
+      <td>
+        {% if asset.assigned_employee %}
+          {{ asset.assigned_employee.first_name }} {{ asset.assigned_employee.last_name }}
+        {% endif %}
+      </td>
+      <td>
+        <a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-primary ms-2">Delete</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
 {% endblock %}
