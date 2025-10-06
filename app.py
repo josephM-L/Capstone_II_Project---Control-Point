@@ -10,6 +10,7 @@ from AssetManagement.employees import employee_bp
 from AssetManagement.asset_assignments import asset_assignment_bp
 from AssetManagement.asset_maintenance import asset_maintenance_bp
 from AssetManagement.asset_disposals import asset_disposal_bp
+from MiscPages.login import login_bp
 
 app = Flask(__name__)
 #TODO use something like import os to generate this later for security
@@ -29,6 +30,7 @@ port: int = 3306
 db_link: str = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
 
 print(db_link)
+
 
 #TODO this needs to be obscured and changed later for security purposes
 #TODO we need to dynamically swap this to admin or user accounts
@@ -54,6 +56,8 @@ app.register_blueprint(employee_bp)             # employees.py
 app.register_blueprint(asset_assignment_bp)      # asset_assignments.py
 app.register_blueprint(asset_maintenance_bp)     # asset_maintenance.py
 app.register_blueprint(asset_disposal_bp)        # asset_disposals.py
+
+app.register_blueprint(login_bp)                 # login.py
 
 
 # run the app
