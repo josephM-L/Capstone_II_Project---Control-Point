@@ -1,12 +1,76 @@
+import csv
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, request, flash
 from models import db, Asset, AssetType, AssetStatus, Location, Vendor, Employee
+from io import TextIOWrapper
 
 assets_bp = Blueprint("assets", __name__)
 
 @assets_bp.route("/assets", methods=["GET", "POST"])
 def assets():
     if request.method == "POST":
+
+        # For uploading CSV
+        if "csv_file" in request.files and request.files["csv_file"].filename:
+            file = request.files["csv_file"]
+            try:
+                stream = TextIOWrapper(file.stream, encoding="utf-8")
+                csv_reader = csv.DictReader(stream)
+                count = 0
+
+                for row in csv_reader:
+                    # Look up related foreign keys by name if given
+                    # THESE ITEMS WILL ONLY BE ADDED IF THEY EXIST IN THEIR RESPECTIVE TABLES
+                    asset_type = AssetType.query.filter_by(name=row.get("asset_type")).first() if row.get(
+                        "asset_type") else None
+                    status = AssetStatus.query.filter_by(status_name=row.get("status")).first() if row.get(
+                        "status") else None
+                    location = Location.query.filter_by(name=row.get("location")).first() if row.get(
+                        "location") else None
+                    vendor = Vendor.query.filter_by(name=row.get("vendor")).first() if row.get("vendor") else None
+                    employee = Employee.query.filter_by(email=row.get("assigned_to")).first() if row.get(
+                        "assigned_to") else None
+
+                    # Parse dates and numbers
+                    purchase_date = (
+                        datetime.strptime(row.get("purchase_date"), "%Y-%m-%d").date()
+                        if row.get("purchase_date") else None
+                    )
+                    warranty_expiry = (
+                        datetime.strptime(row.get("warranty_expiry"), "%Y-%m-%d").date()
+                        if row.get("warranty_expiry") else None
+                    )
+                    purchase_cost = float(row.get("purchase_cost")) if row.get("purchase_cost") else None
+
+                    # Build asset DB entry and queue for commit
+                    asset = Asset(
+                        asset_tag=row.get("asset_tag", "").strip(),
+                        name=row.get("name", "").strip(),
+                        description=row.get("description"),
+                        purchase_date=purchase_date,
+                        purchase_cost=purchase_cost,
+                        serial_number=row.get("serial_number"),
+                        warranty_expiry=warranty_expiry,
+                        asset_type_id=asset_type.asset_type_id if asset_type else None,
+                        status_id=status.status_id if status else None,
+                        location_id=location.location_id if location else None,
+                        vendor_id=vendor.vendor_id if vendor else None,
+                        assigned_to=employee.employee_id if employee else None,
+                    )
+                    db.session.add(asset)
+                    count += 1
+
+                # Commit additions to DB
+                db.session.commit()
+                flash(f"Successfully imported {count} assets from CSV!", "success")
+
+                # Handle errors and exceptions
+            except Exception as e:
+                db.session.rollback()
+                flash(f"Error importing CSV: {e}", "danger")
+            return redirect("/assets")
+
+        # For manual form submission
         asset_tag = request.form.get("asset_tag", "").strip()
         name = request.form.get("name", "").strip()
         description = request.form.get("description")
@@ -55,7 +119,7 @@ def assets():
             flash(f"Error: {e}", "danger")
             return redirect("/assets")
 
-    # Query all assets
+    # Query all assets for display
     asset_query = Asset.query.order_by(Asset.asset_id).all()
 
     # Query related tables for dropdowns
