@@ -1,13 +1,21 @@
 {% extends "base.html" %}
-{% block title %}Add Asset{% endblock %}
+{% block title %}Assets{% endblock %}
 {% block content %}
 
 {% block subnav %}
 {% include "subnav.html" %}
 {% endblock %}
 
-<h1>Add Asset</h1>
-  
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+	<h1>Assets</h1>
+	<div>
+		<a href="#addAssetSection" id="toggleAddAssetBtn" class="btn btn-success" data-bs-toggle="collapse" data-bs-target="#assetTable,#addAssetSection" aria-expanded="false">
+			<i class="bi bi-plus-circle"></i> Add Asset
+		</a>
+	</div>
+</div>
+
+
 {% with messages = get_flashed_messages(with_categories=true) %}
   {% if messages %}
     {% for category, msg in messages %}
@@ -16,158 +24,248 @@
   {% endif %}
 {% endwith %}
 
-<!-- CSV upload form -->
-<h2>Upload From CSV</h2>
-<form action="{{ url_for('assets.assets') }}" method="POST" enctype="multipart/form-data">
-    <div class="mb-3">
-        <label for="csv_file" class="form-label"></label>
-        <input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
-        <div class="form-text">Only .csv files are supported.</div>
-    </div>
-    <button type="submit" class="btn btn-primary">Upload CSV</button>
-</form>
+<!-- Add asset section (Initially Hidden) -->
+<div class="collapse" id="addAssetSection">
+	<h2>Add Asset</h2>
 
-<p></p>
+	<!-- CSV upload form -->
+	<div class="card mb-4">
+		<div class="card-body">
+			<h5>Upload from CSV</h5>
+			<form action="{{ url_for('assets.assets') }}" method="POST" enctype="multipart/form-data">
+				<div class="mb-3">
+					<input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+					<div class="form-text">Only .csv files are supported.</div>
+				</div>
+				<button type="submit" class="btn btn-primary">Upload CSV</button>
+			</form>
+		</div>
+	</div>
 
-<!-- Manual data entry form -->
-<h2>Enter Data Manually</h2>
-<form method="post" class="mt-3">
-  <div class="mb-3">
-    <label for="asset_tag">Asset Tag *</label>
-    <input id="asset_tag" name="asset_tag" class="form-control" required>
-  </div>
+	<!-- Manual form -->
+	<div class="card mb-4">
+		<div class="card-body">
+			<h5>Enter Data Manually</h5>
+			<form method="post">
+				<div class="mb-3">
+					<label for="asset_tag">Asset Tag *</label>
+					<input id="asset_tag" name="asset_tag" class="form-control" required>
+				</div>
 
-  <div class="mb-3">
-    <label for="name" class="form-label">Name *</label>
-    <input id="name" name="name" class="form-control" required>
-  </div>
+				<div class="mb-3">
+					<label for="name" class="form-label">Name *</label>
+					<input id="name" name="name" class="form-control" required>
+				</div>
 
-  <div class="mb-3">
-    <label for="description" class="form-label">Description</label>
-    <textarea id="description" name="description" class="form-control"></textarea>
-  </div>
+				<div class="mb-3">
+					<label for="description" class="form-label">Description</label>
+					<textarea id="description" name="description" class="form-control"></textarea>
+				</div>
 
-  <div class="mb-3">
-    <label for="purchase_date">Purchase Date</label>
-    <input id="purchase_date" name="purchase_date" type="date" class="form-control">
-  </div>
+				<div class="mb-3">
+					<label for="purchase_date">Purchase Date</label>
+					<input id="purchase_date" name="purchase_date" type="date" class="form-control">
+				</div>
 
-  <div class="mb-3">
-    <label for="purchase_cost">Purchase Cost</label>
-    <input id="purchase_cost" name="purchase_cost" type="number" step="0.01" class="form-control">
-  </div>
+				<div class="mb-3">
+					<label for="purchase_cost">Purchase Cost</label>
+					<input id="purchase_cost" name="purchase_cost" type="number" step="0.01" class="form-control">
+				</div>
 
-  <div class="mb-3">
-    <label for="serial_number">Serial Number</label>
-    <input id="serial_number" name="serial_number" class="form-control">
-  </div>
+				<div class="mb-3">
+					<label for="serial_number">Serial Number</label>
+					<input id="serial_number" name="serial_number" class="form-control">
+				</div>
 
-  <div class="mb-3">
-    <label for="warranty_expiry">Warranty Expiry</label>
-    <input id="warranty_expiry" name="warranty_expiry" type="date" class="form-control">
-  </div>
+				<div class="mb-3">
+					<label for="warranty_expiry">Warranty Expiry</label>
+					<input id="warranty_expiry" name="warranty_expiry" type="date" class="form-control">
+				</div>
 
-  <!-- Dropdowns for relationships -->
-  <div class="mb-3">
-    <label for="asset_type_id">Asset Type</label>
-    <select id="asset_type_id" name="asset_type_id" class="form-control">
-      <option value="">-- Select Type --</option>
-      {% for t in asset_types %}
-        <option value="{{ t.asset_type_id }}">{{ t.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+				<!-- Dropdowns for relationships -->
+				<div class="mb-3">
+					<label for="asset_type_id">Asset Type</label>
+					<select id="asset_type_id" name="asset_type_id" class="form-control">
+						<option value="">-- Select Type --</option>
+						{% for t in asset_types %}
+							<option value="{{ t.asset_type_id }}">{{ t.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 
-  <div class="mb-3">
-    <label for="status_id">Status</label>
-    <select id="status_id" name="status_id" class="form-control">
-      <option value="">-- Select Status --</option>
-      {% for s in statuses %}
-        <option value="{{ s.status_id }}">{{ s.status_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+				<div class="mb-3">
+					<label for="status_id">Status</label>
+					<select id="status_id" name="status_id" class="form-control">
+						<option value="">-- Select Status --</option>
+						{% for s in statuses %}
+							<option value="{{ s.status_id }}">{{ s.status_name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 
-  <div class="mb-3">
-    <label for="location_id">Location</label>
-    <select id="location_id" name="location_id" class="form-control">
-      <option value="">-- Select Location --</option>
-      {% for loc in locations %}
-        <option value="{{ loc.location_id }}">{{ loc.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+				<div class="mb-3">
+					<label for="location_id">Location</label>
+					<select id="location_id" name="location_id" class="form-control">
+						<option value="">-- Select Location --</option>
+						{% for loc in locations %}
+							<option value="{{ loc.location_id }}">{{ loc.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 
-  <div class="mb-3">
-    <label for="vendor_id">Vendor</label>
-    <select id="vendor_id" name="vendor_id" class="form-control">
-      <option value="">-- Select Vendor --</option>
-      {% for v in vendors %}
-        <option value="{{ v.vendor_id }}">{{ v.name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+				<div class="mb-3">
+					<label for="vendor_id">Vendor</label>
+					<select id="vendor_id" name="vendor_id" class="form-control">
+						<option value="">-- Select Vendor --</option>
+						{% for v in vendors %}
+							<option value="{{ v.vendor_id }}">{{ v.name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 
-  <div class="mb-3">
-    <label for="assigned_to">Assigned Employee</label>
-    <select id="assigned_to" name="assigned_to" class="form-control">
-      <option value="">-- Select Employee --</option>
-      {% for e in employees %}
-        <option value="{{ e.employee_id }}">{{ e.first_name }} {{ e.last_name }}</option>
-      {% endfor %}
-    </select>
-  </div>
+				<div class="mb-3">
+					<label for="assigned_to">Assigned Employee</label>
+					<select id="assigned_to" name="assigned_to" class="form-control">
+						<option value="">-- Select Employee --</option>
+						{% for e in employees %}
+							<option value="{{ e.employee_id }}">{{ e.first_name }} {{ e.last_name }}</option>
+						{% endfor %}
+					</select>
+				</div>
 
-  <button type="submit" class="btn btn-success">Add Asset</button>
-</form>
+				<button type="submit" class="btn btn-success">Add Asset</button>
+			</form>
+		</div>
+	</div>
+</div>
 
-<p></p>
+<!-- Table View (Visible by Default) -->
+<div class="collapse show" id="assetTable">
+	<table class="table table-striped">
+		<thead>
+			<tr>
+				<th>
+                <a href="?sort=asset_id&direction={{ 'desc' if sort == 'asset_id' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  ID {% if sort == 'asset_id' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
 
-<h1>All Assets</h1>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Tag</th>
-      <th>Name</th>
-      <th>Description</th>
-      <th>Purchase Date</th>
-      <th>Cost</th>
-      <th>Serial Number</th>
-      <th>Warranty Expiry</th>
-      <th>Type</th>
-      <th>Status</th>
-      <th>Location</th>
-      <th>Vendor</th>
-      <th>Assigned To</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for asset in assets %}
-    <tr>
-      <td>{{ asset.asset_id }}</td>
-      <td>{{ asset.asset_tag }}</td>
-      <td>{{ asset.name }}</td>
-      <td>{{ asset.description or "" }}</td>
-      <td>{{ asset.purchase_date or "" }}</td>
-      <td>{{ asset.purchase_cost or "" }}</td>
-      <td>{{ asset.serial_number or "" }}</td>
-      <td>{{ asset.warranty_expiry or "" }}</td>
-      <td>{{ asset.asset_type.name if asset.asset_type else "" }}</td>
-      <td>{{ asset.status.status_name if asset.status else "" }}</td>
-      <td>{{ asset.location.name if asset.location else "" }}</td>
-      <td>{{ asset.vendor.name if asset.vendor else "" }}</td>
-      <td>
-        {% if asset.assigned_employee %}
-          {{ asset.assigned_employee.first_name }} {{ asset.assigned_employee.last_name }}
-        {% endif %}
-      </td>
-      <td>
-        <a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-primary ms-2">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+				<th>
+                <a href="?sort=asset_tag&direction={{ 'desc' if sort == 'asset_tag' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  Tag {% if sort == 'asset_tag' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
+
+                <th>
+                  <a href="?sort=name&direction={{ 'desc' if sort == 'name' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Name {% if sort == 'name' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                <a href="?sort=description&direction={{ 'desc' if sort == 'description' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  Description {% if sort == 'description' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
+
+                <th>
+                  <a href="?sort=purchase_date&direction={{ 'desc' if sort == 'purchase_date' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Purchase Date {% if sort == 'purchase_date' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                  <a href="?sort=purchase_cost&direction={{ 'desc' if sort == 'purchase_cost' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Cost {% if sort == 'purchase_cost' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                <a href="?sort=serial_number&direction={{ 'desc' if sort == 'serial_number' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  Serial Number {% if sort == 'serial_number' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
+
+                <th>
+                <a href="?sort=warranty_expiry&direction={{ 'desc' if sort == 'warranty_expiry' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  Warranty Expiry {% if sort == 'warranty_expiry' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
+
+                <th>
+                <a href="?sort=asset_type_id&direction={{ 'desc' if sort == 'asset_type_id' and direction == 'asc' else 'asc' }}"
+                   class="text-dark text-decoration-none text-nowrap fw-bold">
+                  Type {% if sort == 'asset_type_id' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                </a>
+                </th>
+
+                <th>
+                  <a href="?sort=status_id&direction={{ 'desc' if sort == 'status_id' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Status {% if sort == 'status_id' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                  <a href="?sort=location_id&direction={{ 'desc' if sort == 'location_id' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Location {% if sort == 'location_id' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                  <a href="?sort=vendor_id&direction={{ 'desc' if sort == 'vendor_id' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Vendor {% if sort == 'vendor_id' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th>
+                  <a href="?sort=assigned_to&direction={{ 'desc' if sort == 'assigned_to' and direction == 'asc' else 'asc' }}"
+                     class="text-dark text-decoration-none text-nowrap fw-bold">
+                    Assigned To {% if sort == 'assigned_to' %}{{ '↑' if direction == 'asc' else '↓' }}{% endif %}
+                  </a>
+                </th>
+
+                <th class="fw-bold text-nowrap">Actions</th>
+
+			</tr>
+		</thead>
+		<tbody>
+			{% for asset in assets %}
+			<tr>
+				<td>{{ asset.asset_id }}</td>
+				<td>{{ asset.asset_tag }}</td>
+				<td>{{ asset.name }}</td>
+				<td>{{ asset.description or "" }}</td>
+				<td>{{ asset.purchase_date or "" }}</td>
+				<td>{{ asset.purchase_cost or "" }}</td>
+				<td>{{ asset.serial_number or "" }}</td>
+				<td>{{ asset.warranty_expiry or "" }}</td>
+				<td>{{ asset.asset_type.name if asset.asset_type else "" }}</td>
+				<td>{{ asset.status.status_name if asset.status else "" }}</td>
+				<td>{{ asset.location.name if asset.location else "" }}</td>
+				<td>{{ asset.vendor.name if asset.vendor else "" }}</td>
+				<td>
+					{% if asset.assigned_employee %}
+						{{ asset.assigned_employee.first_name }} {{ asset.assigned_employee.last_name }}
+					{% endif %}
+				</td>
+				<td>
+					<a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-primary btn-sm">Delete</a>
+				</td>
+			</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
 {% endblock %}

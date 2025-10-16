@@ -1,6 +1,7 @@
 import csv
 from datetime import datetime
 from flask import Blueprint, render_template, redirect, request, flash
+from sqlalchemy import text
 from models import db, Asset, AssetType, AssetStatus, Location, Vendor, Employee
 from io import TextIOWrapper
 
@@ -9,6 +10,9 @@ assets_bp = Blueprint("assets", __name__)
 @assets_bp.route("/assets", methods=["GET", "POST"])
 def assets():
     if request.method == "POST":
+        # Reset auto increment
+        db.session.execute(text("ALTER TABLE assets AUTO_INCREMENT = 1;"))
+        db.session.commit()
 
         # For uploading CSV
         if "csv_file" in request.files and request.files["csv_file"].filename:
@@ -86,6 +90,7 @@ def assets():
         vendor_id = request.form.get("vendor_id")
         assigned_to = request.form.get("assigned_to")
 
+        # Alert user if required fields are not filled out
         if not asset_tag or not name:
             flash("Asset tag and name are required!", "danger")
             return redirect("/assets")
@@ -129,14 +134,47 @@ def assets():
     vendors = Vendor.query.order_by(Vendor.name).all()
     employees = Employee.query.order_by(Employee.last_name, Employee.first_name).all()
 
+    # Handle sorting
+    sort = request.args.get("sort", "asset_id") # Default sort column
+    direction = request.args.get("direction", "asc") # Default sort direction
+
+    # Define valid columns to avoid SQL injection attacks
+    valid_columns = {
+        "asset_id": Asset.asset_id,
+        "asset_tag": Asset.asset_tag,
+        "name": Asset.name,
+        "description": Asset.description,
+        "asset_type_id": Asset.asset_type_id,
+        "status_id": Asset.status_id,
+        "location_id": Asset.location_id,
+        "assigned_to": Asset.assigned_to,
+        "purchase_date": Asset.purchase_date,
+        "purchase_cost": Asset.purchase_cost,
+        "vendor_id": Asset.vendor_id,
+        "warranty_expiry": Asset.warranty_expiry,
+        "serial_number": Asset.serial_number,
+        "created_at": Asset.created_at, # TODO Maybe add to sort and table?
+        "updated_at": Asset.updated_at # TODO Maybe add to sort and table?
+    }
+
+    sort_column = valid_columns.get(sort, Asset.asset_id)
+
+    if direction == "desc":
+        assets = Asset.query.order_by(sort_column.desc()).all()
+    else:
+        assets = Asset.query.order_by(sort_column.asc()).all()
+
+    # Display table of all assets
     return render_template(
         "assets.html",
-        assets=asset_query,
+        assets=assets,
         asset_types=asset_types,
         statuses=statuses,
         locations=locations,
         vendors=vendors,
-        employees=employees
+        employees=employees,
+        sort = sort,
+        direction = direction
     )
 
 

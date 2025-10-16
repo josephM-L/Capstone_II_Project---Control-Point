@@ -1,16 +1,51 @@
+{% set current = request.endpoint %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-secondary">
-  <div class="container d-flex justify-content-center">
-    <ul class="navbar-nav d-flex flex-row w-100" style="justify-content: space-evenly;">
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('assets.assets') }}">Assets</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_type.asset_types') }}">Asset Types</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_status.asset_statuses') }}">Asset Statuses</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('location.locations') }}">Locations</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('vendor.vendors') }}">Vendors</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('department.departments') }}">Departments</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('employee.employees') }}">Employees</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_assignment.asset_assignments') }}">Assignments</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_maintenance.asset_maintenance') }}">Maintenance</a></li>
-      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('asset_disposal.asset_disposals') }}">Disposals</a></li>
+  <div class="container d-flex justify-content-between align-items-center">
+
+    <!-- Left side: common options -->
+    <ul class="navbar-nav d-flex flex-row">
+      <li class="nav-item">
+        <a class="nav-link px-3 {% if current == 'assets.assets' %}fw-bold{% endif %}" href="{{ url_for('assets.assets') }}">Assets</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link px-3 {% if current == 'employee.employees' %}fw-bold{% endif %}" href="{{ url_for('employee.employees') }}">Employees</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link px-3 {% if current == 'asset_assignment.asset_assignments' %}fw-bold{% endif %}" href="{{ url_for('asset_assignment.asset_assignments') }}">Assignments</a>
+      </li>
     </ul>
+
+    <!-- Right side: uncommon/advanced/admin dropdown -->
+    <ul class="navbar-nav d-flex flex-row">
+      <li class="nav-item dropdown">
+        <a class="nav-link dropdown-toggle d-flex align-items-center px-3 {% if current in [
+          'asset_maintenance.asset_maintenance',
+          'asset_disposal.asset_disposals',
+          'asset_type.asset_types',
+          'asset_status.asset_statuses',
+          'location.locations',
+          'department.departments',
+          'vendor.vendors'
+        ] %}fw-bold{% endif %}"
+           href="#" id="advancedDropdown"
+           role="button" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="bi bi-gear-fill me-1"></i> Advanced
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end bg-secondary" aria-labelledby="advancedDropdown">
+          <li><a class="dropdown-item {% if current == 'asset_maintenance.asset_maintenance' %}fw-bold{% endif %}" href="{{ url_for('asset_maintenance.asset_maintenance') }}">Maintenance</a></li>
+          <li><a class="dropdown-item {% if current == 'asset_disposal.asset_disposals' %}fw-bold{% endif %}" href="{{ url_for('asset_disposal.asset_disposals') }}">Disposals</a></li>
+          <li><hr class="dropdown-divider"></li>
+          <li><a class="dropdown-item {% if current == 'asset_type.asset_types' %}fw-bold{% endif %}" href="{{ url_for('asset_type.asset_types') }}">Asset Types</a></li>
+          <li><a class="dropdown-item {% if current == 'asset_status.asset_statuses' %}fw-bold{% endif %}" href="{{ url_for('asset_status.asset_statuses') }}">Statuses</a></li>
+          <li><a class="dropdown-item {% if current == 'location.locations' %}fw-bold{% endif %}" href="{{ url_for('location.locations') }}">Locations</a></li>
+          <li><a class="dropdown-item {% if current == 'department.departments' %}fw-bold{% endif %}" href="{{ url_for('department.departments') }}">Departments</a></li>
+          <li><a class="dropdown-item {% if current == 'vendor.vendors' %}fw-bold{% endif %}" href="{{ url_for('vendor.vendors') }}">Vendors</a></li>
+        </ul>
+      </li>
+    </ul>
+
   </div>
 </nav>
