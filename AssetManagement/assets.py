@@ -124,8 +124,9 @@ def assets():
             flash(f"Error: {e}", "danger")
             return redirect("/assets")
 
-    # Query all assets for display
-    asset_query = Asset.query.order_by(Asset.asset_id).all()
+
+
+    # DISPLAY TABLE ------------------------------------------------------------------------
 
     # Query related tables for dropdowns
     asset_types = AssetType.query.order_by(AssetType.name).all()
@@ -159,12 +160,13 @@ def assets():
 
     sort_column = valid_columns.get(sort, Asset.asset_id)
 
+    # Query table with sorting and ordering from input
     if direction == "desc":
         assets = Asset.query.order_by(sort_column.desc()).all()
     else:
         assets = Asset.query.order_by(sort_column.asc()).all()
 
-    # Display table of all assets
+    # Display table of all assets and data entry forms
     return render_template(
         "assets.html",
         assets=assets,

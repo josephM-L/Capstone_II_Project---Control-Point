@@ -55,7 +55,7 @@ app.register_blueprint(department_bp)           # departments.py
 app.register_blueprint(employee_bp)             # employees.py
 app.register_blueprint(asset_assignment_bp)      # asset_assignments.py
 app.register_blueprint(asset_maintenance_bp)     # asset_maintenance.py
-app.register_blueprint(asset_disposal_bp)        # asset_disposa5ls.py
+app.register_blueprint(asset_disposal_bp)        # asset_disposals.py
 
 app.register_blueprint(login_bp)                 # login.py
 
