@@ -1,82 +1,114 @@
 {% extends "base.html" %}
-
 {% block title %}Vendors{% endblock %}
-
 {% block content %}
 
 {% block subnav %}
-{% include "subnav.html" %}
+	{% include "subnav.html" %}
 {% endblock %}
 
-<h1>Add Vendor</h1>
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+	<h1>Vendors</h1>
+	<a href="#addVendorSection" id="toggleAddVendorBtn" class="btn btn-success"
+	   data-bs-toggle="collapse" data-bs-target="#vendorTable,#addVendorSection"
+	   aria-expanded="false">
+		<i class="bi bi-plus-circle"></i> Add Vendor
+	</a>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, msg in messages %}
-      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
+	{% if messages %}
+		{% for category, msg in messages %}
+			<div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+		{% endfor %}
+	{% endif %}
 {% endwith %}
 
-<form method="post" class="mt-3">
-  <div class="mb-3">
-    <label for="name" class="form-label">Vendor Name *</label>
-    <input id="name" name="name" class="form-control" required>
-  </div>
+<!-- Add Vendor Section -->
+<div class="collapse" id="addVendorSection">
+	<h2>Add Vendor</h2>
 
-  <div class="mb-3">
-    <label for="contact_name" class="form-label">Contact Name</label>
-    <input id="contact_name" name="contact_name" class="form-control">
-  </div>
+	<div class="card mb-4">
+		<div class="card-body">
+			<form method="post">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="name" class="form-label">Vendor Name *</label>
+						<input id="name" name="name" class="form-control" required>
+					</div>
 
-  <div class="mb-3">
-    <label for="phone" class="form-label">Phone</label>
-    <input id="phone" name="phone" class="form-control">
-  </div>
+					<div class="col-md-6">
+						<label for="contact_name" class="form-label">Contact Name</label>
+						<input id="contact_name" name="contact_name" class="form-control">
+					</div>
 
-  <div class="mb-3">
-    <label for="email" class="form-label">Email</label>
-    <input id="email" name="email" class="form-control">
-  </div>
+					<div class="col-md-6">
+						<label for="phone" class="form-label">Phone</label>
+						<input id="phone" name="phone" class="form-control">
+					</div>
 
-  <div class="mb-3">
-    <label for="address" class="form-label">Address</label>
-    <input id="address" name="address" class="form-control">
-  </div>
+					<div class="col-md-6">
+						<label for="email" class="form-label">Email</label>
+						<input id="email" name="email" type="email" class="form-control">
+					</div>
 
-  <button type="submit" class="btn btn-success">Add Vendor</button>
-</form>
+					<div class="col-12">
+						<label for="address" class="form-label">Address</label>
+						<input id="address" name="address" class="form-control">
+					</div>
+				</div>
 
-<p></p>
+				<div class="mt-4">
+					<button type="submit" class="btn btn-success">Add Vendor</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 
-<h2>Existing Vendors</h2>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Contact Name</th>
-      <th>Phone</th>
-      <th>Email</th>
-      <th>Address</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for vendor in vendors %}
-    <tr>
-      <td>{{ vendor.vendor_id }}</td>
-      <td>{{ vendor.name }}</td>
-      <td>{{ vendor.contact_name or "" }}</td>
-      <td>{{ vendor.phone or "" }}</td>
-      <td>{{ vendor.email or "" }}</td>
-      <td>{{ vendor.address or "" }}</td>
-      <td>
-        <a href="/vendors/delete/{{ vendor.vendor_id }}" class="btn btn-primary ms-2">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- Vendors Table -->
+<div class="collapse show" id="vendorTable">
+	<h2>Existing Vendors</h2>
+	<table class="table table-striped align-middle">
+		<thead class="table-light">
+			<tr>
+				{% set columns = [
+					('vendor_id', 'ID'),
+					('name', 'Name'),
+					('contact_name', 'Contact Name'),
+					('phone', 'Phone'),
+					('email', 'Email'),
+					('address', 'Address')
+				] %}
+				{% for field, label in columns %}
+					<th class="fw-bold text-nowrap">
+						<a href="?sort={{ field }}&direction={{ 'desc' if sort == field and direction == 'asc' else 'asc' }}"
+						   class="text-dark text-decoration-none text-nowrap">
+							{{ label }}
+							{% if sort == field %}
+								{{ '↑' if direction == 'asc' else '↓' }}
+							{% endif %}
+						</a>
+					</th>
+				{% endfor %}
+				<th class="fw-bold text-nowrap">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for vendor in vendors %}
+				<tr>
+					<td>{{ vendor.vendor_id }}</td>
+					<td>{{ vendor.name }}</td>
+					<td>{{ vendor.contact_name or '' }}</td>
+					<td>{{ vendor.phone or '' }}</td>
+					<td>{{ vendor.email or '' }}</td>
+					<td>{{ vendor.address or '' }}</td>
+					<td>
+						<a href="/vendors/delete/{{ vendor.vendor_id }}" class="btn btn-sm btn-danger">Delete</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 
 {% endblock %}

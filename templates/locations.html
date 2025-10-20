@@ -1,75 +1,106 @@
 {% extends "base.html" %}
-
 {% block title %}Locations{% endblock %}
-
 {% block content %}
 
 {% block subnav %}
-{% include "subnav.html" %}
+	{% include "subnav.html" %}
 {% endblock %}
 
-<h1>Add Location</h1>
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+	<h1>Locations</h1>
+	<a href="#addLocationSection" id="toggleAddLocationBtn" class="btn btn-success"
+	   data-bs-toggle="collapse" data-bs-target="#locationTable,#addLocationSection"
+	   aria-expanded="false">
+		<i class="bi bi-plus-circle"></i> Add Location
+	</a>
+</div>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, msg in messages %}
-      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
+	{% if messages %}
+		{% for category, msg in messages %}
+			<div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+		{% endfor %}
+	{% endif %}
 {% endwith %}
 
-<form method="post" class="mt-3">
-  <div class="mb-3">
-    <label for="name" class="form-label">Location Name *</label>
-    <input id="name" name="name" class="form-control" required>
-  </div>
+<!-- Add Location Section -->
+<div class="collapse" id="addLocationSection">
+	<h2>Add Location</h2>
 
-  <div class="mb-3">
-    <label for="address" class="form-label">Address</label>
-    <input id="address" name="address" class="form-control">
-  </div>
+	<div class="card mb-4">
+		<div class="card-body">
+			<form method="post">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="name" class="form-label">Location Name *</label>
+						<input id="name" name="name" class="form-control" required>
+					</div>
 
-  <div class="mb-3">
-    <label for="city" class="form-label">City</label>
-    <input id="city" name="city" class="form-control">
-  </div>
+					<div class="col-md-6">
+						<label for="address" class="form-label">Address</label>
+						<input id="address" name="address" class="form-control">
+					</div>
 
-  <div class="mb-3">
-    <label for="country" class="form-label">Country</label>
-    <input id="country" name="country" class="form-control">
-  </div>
+					<div class="col-md-6">
+						<label for="city" class="form-label">City</label>
+						<input id="city" name="city" class="form-control">
+					</div>
 
-  <button type="submit" class="btn btn-success">Add Location</button>
-</form>
+					<div class="col-md-6">
+						<label for="country" class="form-label">Country</label>
+						<input id="country" name="country" class="form-control">
+					</div>
+				</div>
 
-<p></p>
+				<div class="mt-4">
+					<button type="submit" class="btn btn-success">Add Location</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
 
-<h2>Existing Locations</h2>
-<table class="table table-striped">
-  <thead>
-    <tr>
-      <th>ID</th>
-      <th>Name</th>
-      <th>Address</th>
-      <th>City</th>
-      <th>Country</th>
-      <th>Actions</th>
-    </tr>
-  </thead>
-  <tbody>
-    {% for location in locations %}
-    <tr>
-      <td>{{ location.location_id }}</td>
-      <td>{{ location.name }}</td>
-      <td>{{ location.address or "" }}</td>
-      <td>{{ location.city or "" }}</td>
-      <td>{{ location.country or "" }}</td>
-      <td>
-        <a href="/locations/delete/{{ location.location_id }}" class="btn btn-primary ms-2">Delete</a>
-      </td>
-    </tr>
-    {% endfor %}
-  </tbody>
-</table>
+<!-- Locations Table -->
+<div class="collapse show" id="locationTable">
+	<table class="table table-striped align-middle">
+		<thead class="table-light">
+			<tr>
+				{% set columns = [
+					('location_id', 'ID'),
+					('name', 'Name'),
+					('address', 'Address'),
+					('city', 'City'),
+					('country', 'Country')
+				] %}
+				{% for field, label in columns %}
+					<th class="fw-bold text-nowrap">
+						<a href="?sort={{ field }}&direction={{ 'desc' if sort == field and direction == 'asc' else 'asc' }}"
+						   class="text-dark text-decoration-none text-nowrap">
+							{{ label }}
+							{% if sort == field %}
+								{{ '↑' if direction == 'asc' else '↓' }}
+							{% endif %}
+						</a>
+					</th>
+				{% endfor %}
+				<th class="fw-bold text-nowrap">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for location in locations %}
+				<tr>
+					<td>{{ location.location_id }}</td>
+					<td>{{ location.name }}</td>
+					<td>{{ location.address or '' }}</td>
+					<td>{{ location.city or '' }}</td>
+					<td>{{ location.country or '' }}</td>
+					<td>
+						<a href="/locations/delete/{{ location.location_id }}" class="btn btn-sm btn-danger">Delete</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
 
 {% endblock %}
