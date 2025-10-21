@@ -157,9 +157,10 @@ def assets():
 	vendors = Vendor.query.order_by(Vendor.name).all()
 	employees = Employee.query.order_by(Employee.last_name, Employee.first_name).all()
 
-	# Handle sorting
+	# Get arguments for sorting & searching
 	sort = request.args.get("sort", "asset_id")  # Default sort column
 	direction = request.args.get("direction", "asc")  # Default sort direction
+	search = request.args.get("search", None)
 
 	# Define valid columns to avoid SQL injection attacks
 	valid_columns = {
@@ -182,11 +183,16 @@ def assets():
 
 	sort_column = valid_columns.get(sort, Asset.asset_id)
 
-	# Query table with sorting and ordering from input
+	# Apply search if necessary
+	assets = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		assets = Asset.query.order_by(sort_column.desc()).all()
+		assets = assets.order_by(sort_column.desc())
 	else:
-		assets = Asset.query.order_by(sort_column.asc()).all()
+		assets = assets.order_by(sort_column.asc())
+
+	#assets = assets.all()
 
 	# Display table of all assets and data entry forms
 	return render_template(
@@ -209,3 +215,26 @@ def delete_asset(asset_id):
 		db.session.delete(asset)
 		db.session.commit()
 	return redirect("/assets")
+
+
+
+# Search function
+def search_for(search):
+	query = Asset.query
+	if search:
+		query = query.filter(
+			(Asset.asset_id.ilike("%" + search + "%")) |
+			(Asset.name.ilike("%" + search + "%")) |
+			(Asset.description.ilike("%" + search + "%")) |
+			(Asset.asset_type_id.ilike("%" + search + "%")) |
+			(Asset.status_id.ilike("%" + search + "%")) |
+			(Asset.location_id.ilike("%" + search + "%")) |
+			(Asset.assigned_to.ilike("%" + search + "%")) |
+			(Asset.purchase_date.ilike("%" + search + "%")) |
+			(Asset.purchase_cost.ilike("%" + search + "%")) |
+			(Asset.vendor_id.ilike("%" + search + "%")) |
+			(Asset.warranty_expiry.ilike("%" + search + "%")) |
+			(Asset.serial_number.ilike("%" + search + "%"))
+		)
+
+	return query

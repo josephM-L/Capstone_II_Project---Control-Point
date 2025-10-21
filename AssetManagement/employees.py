@@ -97,6 +97,7 @@ def employees():
 	# Handle sorting
 	sort = request.args.get("sort", "employee_id")  # Default sort column
 	direction = request.args.get("direction", "asc")  # Default sort direction
+	search = request.args.get("search", None)
 
 	# Define valid columns to avoid SQL injection attacks
 	valid_columns = {
@@ -112,11 +113,14 @@ def employees():
 
 	sort_column = valid_columns.get(sort, Employee.employee_id)
 
-	# Query employees with sorting
+	# Apply search if necessary
+	employees = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		employees = Employee.query.order_by(sort_column.desc()).all()
+		employees = employees.order_by(sort_column.desc())
 	else:
-		employees = Employee.query.order_by(sort_column.asc()).all()
+		employees = employees.order_by(sort_column.asc())
 
 	# Render table and forms
 	return render_template(
@@ -135,3 +139,20 @@ def delete_employee(employee_id):
 		db.session.delete(employee)
 		db.session.commit()
 	return redirect("/employees")
+
+# Search function
+def search_for(search):
+	query = Employee.query
+	if search:
+		query = query.filter(
+			(Employee.employee_id.ilike("%" + search + "%")) |
+			(Employee.first_name.ilike("%" + search + "%")) |
+			(Employee.last_name.ilike("%" + search + "%")) |
+			(Employee.email.ilike("%" + search + "%")) |
+			(Employee.phone.ilike("%" + search + "%")) |
+			(Employee.role.ilike("%" + search + "%")) |
+			(Employee.status.ilike("%" + search + "%")) |
+			(Employee.department_id.ilike("%" + search + "%"))
+		)
+
+	return query
