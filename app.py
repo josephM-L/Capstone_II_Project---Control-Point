@@ -71,15 +71,6 @@ def assets_by_status():
 
 @app.route('/chart-data/assets-by-department')
 def assets_by_department():
-    """
-    Returns JSON for Chart.js showing number of assets per department.
-    Example output:
-    [
-      {"department": "IT", "count": 12},
-      {"department": "Finance", "count": 5},
-      {"department": "HR", "count": 3}
-    ]
-    """
     try:
         results = (
             db.session.query(
