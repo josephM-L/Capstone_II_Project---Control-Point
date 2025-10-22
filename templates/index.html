@@ -3,38 +3,87 @@
 {% block title %}Home{% endblock %}
 {% block content %}
 
-    <h1>Asset Manager!</h1>
+<h1>Asset Manager!</h1>
 
 <h6>These links are for debug/testing, replace with proper homepage/dashboard later</h6>
 <p><a href="{{ url_for('assets.assets') }}">Manage Assets</a></p>
 <p><a href="{{ url_for('login.login') }}">Log In</a></p>
 
-<div>
-  <canvas id="myChart"></canvas>
-</div>
+
+
+#Charts
+<h3>Assets by Status</h3>
+<canvas id="statusChart" style="max-width:450px; height:300px;"></canvas>
+
+<h3>Assets by Department</h3>
+<canvas id="departmentChart" style="max-width:450px; height:300px;"></canvas>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script>
-  const ctx = document.getElementById('myChart');
+async function loadStatusChart() {
+  const response = await fetch("/chart-data/assets-by-status");
+  const data = await response.json();
 
+  const labels = data.map(item => item.status);
+  const values = data.map(item => item.count);
+
+  const ctx = document.getElementById('statusChart');
   new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: ['Red', 'Blue', 'Yellow', 'Green', 'Purple', 'Orange'],
+      labels: labels,
       datasets: [{
-        label: '# of Votes',
-        data: [12, 19, 3, 5, 2, 3],
+        label: 'Number of Assets',
+        data: values,
+        backgroundColor: 'rgba(54,235,90,0.6)',
+        borderColor: 'rgba(54,235,90,0.75)',
         borderWidth: 1
       }]
     },
     options: {
-      scales: {
-        y: {
-          beginAtZero: true
-        }
+      scales: { y: { beginAtZero: true } }
+    }
+  });
+}
+
+async function loadDepartmentChart() {
+  const response = await fetch("/chart-data/assets-by-department");
+  const data = await response.json();
+
+  const labels = data.map(item => item.department);
+  const values = data.map(item => item.count);
+
+  const ctx = document.getElementById('departmentChart');
+  new Chart(ctx, {
+    type: 'pie',
+    data: {
+      labels: labels,
+      datasets: [{
+        label: 'Assets per Department',
+        data: values,
+        backgroundColor: [
+          'rgba(245,99,255,0.73)',
+          'rgba(54,162,235,0.54)',
+          'rgba(255, 206, 86, 0.6)',
+          'rgba(75, 192, 192, 0.6)',
+          'rgba(153, 102, 255, 0.6)'
+        ],
+        borderColor: 'rgba(255,255,255,1)',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { position: 'top' }
       }
     }
   });
+}
+
+
+loadStatusChart();
+loadDepartmentChart();
 </script>
+
 {% endblock %}
