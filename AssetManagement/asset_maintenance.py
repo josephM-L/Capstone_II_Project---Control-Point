@@ -93,6 +93,7 @@ def asset_maintenance():
 	# Handle sorting
 	sort = request.args.get("sort", "maintenance_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"maintenance_id": AssetMaintenance.maintenance_id,
@@ -106,10 +107,14 @@ def asset_maintenance():
 
 	sort_column = valid_columns.get(sort, AssetMaintenance.maintenance_id)
 
+	# Apply search if necessary
+	maintenances = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		maintenances = AssetMaintenance.query.order_by(sort_column.desc()).all()
+		maintenances = maintenances.order_by(sort_column.desc())
 	else:
-		maintenances = AssetMaintenance.query.order_by(sort_column.asc()).all()
+		maintenances = maintenances.order_by(sort_column.asc())
 
 	return render_template(
 		"asset_maintenance.html",
@@ -127,3 +132,22 @@ def delete_asset_maintenance(maintenance_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/asset_maintenance")
+
+# Search function
+def search_for(search):
+	query = AssetMaintenance.query.join(Asset, AssetMaintenance.asset_id == Asset.asset_id)
+
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(AssetMaintenance.maintenance_id.cast(db.String).ilike(search_pattern)) |
+			(Asset.asset_tag.ilike(search_pattern)) |
+			(Asset.name.ilike(search_pattern)) |
+			(AssetMaintenance.description.ilike(search_pattern)) |
+			(AssetMaintenance.performed_by.ilike(search_pattern)) |
+			(AssetMaintenance.cost.cast(db.String).ilike(search_pattern)) |
+			(AssetMaintenance.maintenance_date.cast(db.String).ilike(search_pattern)) |
+			(AssetMaintenance.next_due_date.cast(db.String).ilike(search_pattern))
+		)
+
+	return query

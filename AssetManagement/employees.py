@@ -144,15 +144,16 @@ def delete_employee(employee_id):
 def search_for(search):
 	query = Employee.query
 	if search:
+		search_pattern = f"%{search}%"
 		query = query.filter(
-			(Employee.employee_id.ilike("%" + search + "%")) |
-			(Employee.first_name.ilike("%" + search + "%")) |
-			(Employee.last_name.ilike("%" + search + "%")) |
-			(Employee.email.ilike("%" + search + "%")) |
-			(Employee.phone.ilike("%" + search + "%")) |
-			(Employee.role.ilike("%" + search + "%")) |
-			(Employee.status.ilike("%" + search + "%")) |
-			(Employee.department_id.ilike("%" + search + "%"))
+			(Employee.employee_id.ilike(search_pattern)) |
+			(Employee.first_name.ilike(search_pattern)) |
+			(Employee.last_name.ilike(search_pattern)) |
+			(Employee.email.ilike(search_pattern)) |
+			(Employee.phone.ilike(search_pattern)) |
+			(Employee.role.ilike(search_pattern)) |
+			(Employee.status.ilike(search_pattern)) |
+			(Employee.department_id.ilike(search_pattern))
 		)
 
 	return query

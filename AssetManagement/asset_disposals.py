@@ -90,6 +90,7 @@ def asset_disposals():
 	# Handle sorting
 	sort = request.args.get("sort", "disposal_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"disposal_id": AssetDisposal.disposal_id,
@@ -102,10 +103,14 @@ def asset_disposals():
 
 	sort_column = valid_columns.get(sort, AssetDisposal.disposal_id)
 
+	# Apply search if necessary
+	disposals = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		disposals = AssetDisposal.query.order_by(sort_column.desc()).all()
+		disposals = disposals.order_by(sort_column.desc())
 	else:
-		disposals = AssetDisposal.query.order_by(sort_column.asc()).all()
+		disposals = disposals.order_by(sort_column.asc())
 
 	return render_template(
 		"asset_disposals.html",
@@ -123,3 +128,21 @@ def delete_asset_disposal(disposal_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/asset_disposals")
+
+# Search function
+def search_for(search):
+	query = AssetDisposal.query.join(Asset, AssetDisposal.asset_id == Asset.asset_id)
+
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(AssetDisposal.disposal_id.cast(db.String).ilike(search_pattern)) |
+			(Asset.asset_tag.ilike(search_pattern)) |
+			(Asset.name.ilike(search_pattern)) |
+			(AssetDisposal.method.ilike(search_pattern)) |
+			(AssetDisposal.sale_value.cast(db.String).ilike(search_pattern)) |
+			(AssetDisposal.notes.ilike(search_pattern)) |
+			(AssetDisposal.disposal_date.cast(db.String).ilike(search_pattern))
+		)
+
+	return query

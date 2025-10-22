@@ -46,6 +46,7 @@ def locations():
 	# Handle sorting
 	sort = request.args.get("sort", "location_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"location_id": Location.location_id,
@@ -57,10 +58,14 @@ def locations():
 
 	sort_column = valid_columns.get(sort, Location.location_id)
 
+	# Apply search if necessary
+	locations = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		locations = Location.query.order_by(sort_column.desc()).all()
+		locations = locations.order_by(sort_column.desc())
 	else:
-		locations = Location.query.order_by(sort_column.asc()).all()
+		locations = locations.order_by(sort_column.asc())
 
 	return render_template(
 		"locations.html",
@@ -77,3 +82,18 @@ def delete_location(location_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/locations")
+
+
+# Search function
+def search_for(search):
+	query = Location.query
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(Location.location_id.ilike(search_pattern)) |
+			(Location.name.ilike(search_pattern)) |
+			(Location.address.ilike(search_pattern)) |
+			(Location.city.ilike(search_pattern)) |
+			(Location.country.ilike(search_pattern))
+		)
+	return query

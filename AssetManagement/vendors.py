@@ -48,6 +48,7 @@ def vendors():
 	# Handle sorting
 	sort = request.args.get("sort", "vendor_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"vendor_id": Vendor.vendor_id,
@@ -60,10 +61,14 @@ def vendors():
 
 	sort_column = valid_columns.get(sort, Vendor.vendor_id)
 
+	# Apply search if necessary
+	vendors = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		vendors = Vendor.query.order_by(sort_column.desc()).all()
+		vendors = vendors.order_by(sort_column.desc())
 	else:
-		vendors = Vendor.query.order_by(sort_column.asc()).all()
+		vendors = vendors.order_by(sort_column.asc())
 
 	return render_template(
 		"vendors.html",
@@ -80,3 +85,18 @@ def delete_vendor(vendor_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/vendors")
+
+
+# Search function
+def search_for(search):
+	query = Vendor.query
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(Vendor.vendor_id.cast(db.String).ilike(search_pattern)) |
+			(Vendor.name.ilike(search_pattern)) |
+			(Vendor.email.ilike(search_pattern)) |
+			(Vendor.phone.ilike(search_pattern)) |
+			(Vendor.address.ilike(search_pattern))
+		)
+	return query

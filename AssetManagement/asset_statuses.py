@@ -39,6 +39,7 @@ def asset_statuses():
 	# Handle sorting
 	sort = request.args.get("sort", "status_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"status_id": AssetStatus.status_id,
@@ -47,10 +48,14 @@ def asset_statuses():
 
 	sort_column = valid_columns.get(sort, AssetStatus.status_id)
 
+	# Apply search if necessary
+	statuses = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		statuses = AssetStatus.query.order_by(sort_column.desc()).all()
+		statuses = statuses.order_by(sort_column.desc())
 	else:
-		statuses = AssetStatus.query.order_by(sort_column.asc()).all()
+		statuses = statuses.order_by(sort_column.asc())
 
 	return render_template(
 		"asset_status.html",
@@ -67,3 +72,15 @@ def delete_asset_status(status_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/asset_status")
+
+
+# Search function
+def search_for(search):
+	query = AssetStatus.query
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(AssetStatus.status_id.ilike(search_pattern)) |
+			(AssetStatus.status_name.ilike(search_pattern))
+		)
+	return query

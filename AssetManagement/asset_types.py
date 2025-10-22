@@ -43,6 +43,7 @@ def asset_types():
 	# Handle sorting
 	sort = request.args.get("sort", "asset_type_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"asset_type_id": AssetType.asset_type_id,
@@ -53,10 +54,14 @@ def asset_types():
 
 	sort_column = valid_columns.get(sort, AssetType.asset_type_id)
 
+	# Apply search if necessary
+	asset_types = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		asset_types = AssetType.query.order_by(sort_column.desc()).all()
+		asset_types = asset_types.order_by(sort_column.desc())
 	else:
-		asset_types = AssetType.query.order_by(sort_column.asc()).all()
+		asset_types = asset_types.order_by(sort_column.asc())
 
 	return render_template(
 		"asset_type.html",
@@ -73,3 +78,16 @@ def delete_asset_type(asset_type_id):
 		db.session.delete(record)
 		db.session.commit()
 	return redirect("/asset_type")
+
+# Search function
+def search_for(search):
+	query = AssetType.query
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(AssetType.asset_type_id.ilike(search_pattern)) |
+			(AssetType.name.ilike(search_pattern)) |
+			(AssetType.category.ilike(search_pattern)) |
+			(AssetType.description.ilike(search_pattern))
+		)
+	return query

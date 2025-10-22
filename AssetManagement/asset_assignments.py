@@ -91,6 +91,7 @@ def asset_assignments():
 	# Handle sorting
 	sort = request.args.get("sort", "assignment_id")
 	direction = request.args.get("direction", "asc")
+	search = request.args.get("search", None)
 
 	valid_columns = {
 		"assignment_id": AssetAssignment.assignment_id,
@@ -102,10 +103,14 @@ def asset_assignments():
 
 	sort_column = valid_columns.get(sort, AssetAssignment.assignment_id)
 
+	# Apply search if necessary
+	assignments = search_for(search)
+
+	# Apply sorting and ordering from input
 	if direction == "desc":
-		assignments = AssetAssignment.query.order_by(sort_column.desc()).all()
+		assignments = assignments.order_by(sort_column.desc())
 	else:
-		assignments = AssetAssignment.query.order_by(sort_column.asc()).all()
+		assignments = assignments.order_by(sort_column.asc())
 
 	return render_template(
 		"asset_assignments.html",
@@ -124,3 +129,22 @@ def delete_asset_assignment(assignment_id):
 		db.session.delete(assignment)
 		db.session.commit()
 	return redirect("/asset_assignments")
+
+# Search function
+def search_for(search):
+	# Create a join to query assetassignment, asset, and employee tables
+	query = AssetAssignment.query \
+		.join(Asset, AssetAssignment.asset_id == Asset.asset_id) \
+		.join(Employee, AssetAssignment.employee_id == Employee.employee_id)
+	if search:
+		search_pattern = f"%{search}%"
+		query = query.filter(
+			(AssetAssignment.assignment_id.ilike(search_pattern)) |
+			(Asset.asset_tag.ilike(search_pattern)) |
+			(Employee.first_name.ilike(search_pattern)) |
+			(Employee.last_name.ilike(search_pattern)) |
+			(AssetAssignment.assigned_date.ilike(search_pattern)) |
+			(AssetAssignment.returned_date.ilike(search_pattern))
+		)
+
+	return query

@@ -222,19 +222,20 @@ def delete_asset(asset_id):
 def search_for(search):
 	query = Asset.query
 	if search:
+		search_pattern = f"%{search}%"
 		query = query.filter(
-			(Asset.asset_id.ilike("%" + search + "%")) |
-			(Asset.name.ilike("%" + search + "%")) |
-			(Asset.description.ilike("%" + search + "%")) |
-			(Asset.asset_type_id.ilike("%" + search + "%")) |
-			(Asset.status_id.ilike("%" + search + "%")) |
-			(Asset.location_id.ilike("%" + search + "%")) |
-			(Asset.assigned_to.ilike("%" + search + "%")) |
-			(Asset.purchase_date.ilike("%" + search + "%")) |
-			(Asset.purchase_cost.ilike("%" + search + "%")) |
-			(Asset.vendor_id.ilike("%" + search + "%")) |
-			(Asset.warranty_expiry.ilike("%" + search + "%")) |
-			(Asset.serial_number.ilike("%" + search + "%"))
+			(Asset.asset_id.ilike(search_pattern)) |
+			(Asset.name.ilike(search_pattern)) |
+			(Asset.description.ilike(search_pattern)) |
+			(Asset.asset_type_id.ilike(search_pattern)) |
+			(Asset.status_id.ilike(search_pattern)) |
+			(Asset.location_id.ilike(search_pattern)) |
+			(Asset.assigned_to.ilike(search_pattern)) |
+			(Asset.purchase_date.ilike(search_pattern)) |
+			(Asset.purchase_cost.ilike(search_pattern)) |
+			(Asset.vendor_id.ilike(search_pattern)) |
+			(Asset.warranty_expiry.ilike(search_pattern)) |
+			(Asset.serial_number.ilike(search_pattern))
 		)
 
 	return query
