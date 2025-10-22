@@ -85,6 +85,15 @@
 
 <!-- Employee Table -->
 <div class="collapse show" id="employeeTable">
+
+	<!-- Search Bar -->
+	<form method="get" action="{{ url_for('employee.employees') }}" class="mb-3 d-flex">
+	<input type="text" name="search" class="form-control me-2"
+	       placeholder="Search employees..."
+	       value="{{ request.args.get('search', '') }}">
+	<button type="submit" class="btn btn-primary">Search</button>
+	</form>
+
 	<table class="table table-striped align-middle">
 		<thead class="table-light">
 			<tr>
@@ -100,8 +109,8 @@
 				] %}
 				{% for field, label in columns %}
 					<th class="fw-bold text-nowrap">
-						<a href="?sort={{ field }}&direction={{ 'desc' if sort == field and direction == 'asc' else 'asc' }}"
-						   class="text-dark text-decoration-none text-nowrap">
+						<a href="?sort={{ field }}&direction={{ 'desc' if sort == field and direction == 'asc' else 'asc' }}&search={{ request.args.get('search', '') }}"
+   							class="text-dark text-decoration-none text-nowrap">
 							{{ label }}
 							{% if sort == field %}
 								{{ '↑' if direction == 'asc' else '↓' }}
