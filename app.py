@@ -1,4 +1,4 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from models import db
 from AssetManagement.assets import assets_bp
 from AssetManagement.asset_types import asset_type_bp
@@ -11,7 +11,8 @@ from AssetManagement.asset_assignments import asset_assignment_bp
 from AssetManagement.asset_maintenance import asset_maintenance_bp
 from AssetManagement.asset_disposals import asset_disposal_bp
 from MiscPages.login import login_bp
-
+from sqlalchemy import func
+from models import Asset, AssetStatus, Department, Employee
 app = Flask(__name__)
 #TODO use something like import os to generate this later for security
 app.secret_key = "dev-secret"
@@ -45,6 +46,49 @@ db.init_app(app)
 def index():
     return render_template('index.html')
 
+
+
+@app.route('/chart-data/assets-by-status')
+def assets_by_status():
+
+    try:
+        results = (
+            db.session.query(
+                AssetStatus.status_name.label('status'),
+                func.count(Asset.asset_id).label('count')
+            )
+            .join(Asset, Asset.status_id == AssetStatus.status_id)
+            .group_by(AssetStatus.status_name)
+            .all()
+        )
+
+        data = [{"status": r.status, "count": r.count} for r in results]
+        return jsonify(data)
+
+    except Exception as e:
+        print("Error fetching chart data:", e)
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/chart-data/assets-by-department')
+def assets_by_department():
+    try:
+        results = (
+            db.session.query(
+                Department.name.label('department'),
+                func.count(Asset.asset_id).label('count')
+            )
+            .join(Employee, Employee.department_id == Department.department_id)
+            .join(Asset, Asset.assigned_to == Employee.employee_id)
+            .group_by(Department.name)
+            .all()
+        )
+
+        data = [{"department": r.department, "count": r.count} for r in results]
+        return jsonify(data)
+
+    except Exception as e:
+        print("Error fetching department chart data:", e)
+        return jsonify({"error": str(e)}), 500
 # Register all pages using blueprints
 app.register_blueprint(assets_bp)                # assets.py
 app.register_blueprint(asset_type_bp)            # asset_type.py
@@ -62,4 +106,6 @@ app.register_blueprint(login_bp)                 # login.py
 
 # run the app
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()  # Ensures tables exist
     app.run(debug=True)
