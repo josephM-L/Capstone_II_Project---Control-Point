@@ -11,7 +11,12 @@
     <a class="navbar-brand" href="/">Asset Manager</a>
     <ul class="navbar-nav flex-row">
       <!-- <li class="nav-item"><a class="nav-link px-2" href="/">Home</a></li>  -->
+      {% if session['role'] == 'admin' or session['role'] == 'manager' or session['role'] == 'user' %}
       <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('assets.assets') }}">Manage Assets</a></li>
+      {% endif %}
+      {% if session['role'] == 'admin' %}
+      <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('users.users') }}">Manage Users</a></li>
+      {% endif %}
     </ul>
 
     <!-- Right side username / login/logout -->

@@ -6,6 +6,9 @@
 	{% include "subnav.html" %}
 {% endblock %}
 
+{% if session['role'] == 'user' %}
+<h1>Employees</h1>
+{% elif session['role'] == 'manager' or session['role'] == 'admin' %}
 <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
 	<h1>Employees</h1>
 	<a href="#addEmployeeSection" id="toggleAddEmployeeBtn" class="btn btn-success"
@@ -82,6 +85,7 @@
 		</div>
 	</div>
 </div>
+{% endif %}
 
 <!-- Employee Table -->
 <div class="collapse show" id="employeeTable">
@@ -118,7 +122,9 @@
 						</a>
 					</th>
 				{% endfor %}
+				{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 				<th class="fw-bold text-nowrap">Actions</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -132,9 +138,11 @@
 					<td>{{ employee.department.name if employee.department else '' }}</td>
 					<td>{{ employee.role or '' }}</td>
 					<td>{{ employee.status }}</td>
+					{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 					<td>
 						<a href="/employees/delete/{{ employee.employee_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
+					{% endif %}
 				</tr>
 			{% endfor %}
 		</tbody>

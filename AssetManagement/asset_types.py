@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, AssetType
+from route_decorators import role_required
 
 asset_type_bp = Blueprint("asset_type", __name__)
 
 
 @asset_type_bp.route("/asset_type", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def asset_types():
 	if request.method == "POST":
 		# Reset auto increment
@@ -72,6 +74,7 @@ def asset_types():
 
 
 @asset_type_bp.route("/asset_type/delete/<int:asset_type_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_asset_type(asset_type_id):
 	record = AssetType.query.get(asset_type_id)
 	if record:

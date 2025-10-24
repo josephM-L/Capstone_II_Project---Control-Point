@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}User Management{% endblock %}
+{% block content %}
+
+<div class="d-flex justify-content-between align-items-center mt-3 mb-3">
+	<h1>Users</h1>
+	<a href="#addUserSection" id="toggleAddUserBtn" class="btn btn-success"
+	   data-bs-toggle="collapse" data-bs-target="#userTable,#addUserSection"
+	   aria-expanded="false">
+		<i class="bi bi-plus-circle"></i> Add User
+	</a>
+</div>
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		{% for category, msg in messages %}
+			<div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+<!-- Add User Section -->
+<div class="collapse" id="addUserSection">
+	<h2>Add User</h2>
+
+	<div class="card mb-4">
+		<div class="card-body">
+			<form method="post">
+				<div class="row g-3">
+					<div class="col-md-6">
+						<label for="username" class="form-label">Username *</label>
+						<input id="username" name="username" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label for="email" class="form-label">Email *</label>
+						<input type="email" id="email" name="email" class="form-control" required>
+					</div>
+					<div class="col-md-6">
+						<label for="full_name" class="form-label">Full Name</label>
+						<input id="full_name" name="full_name" class="form-control">
+					</div>
+					<div class="col-md-6">
+						<label for="role" class="form-label">Role *</label>
+						<select id="role" name="role" class="form-select" required>
+							<option value="user" selected>User</option>
+							<option value="manager">Manager</option>
+							<option value="admin">Admin</option>
+						</select>
+					</div>
+					<div class="col-md-6">
+						<label for="password" class="form-label">Password *</label>
+						<input type="password" id="password" name="password" class="form-control" required>
+					</div>
+				</div>
+
+				<div class="mt-4">
+					<button type="submit" class="btn btn-success">Add User</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</div>
+
+<!-- User Table -->
+<div class="collapse show" id="userTable">
+
+	<!-- Search Bar -->
+	<form method="get" action="{{ url_for('users.users') }}" class="mb-3 d-flex">
+		<input type="text" name="search" class="form-control me-2"
+		       placeholder="Search users..."
+		       value="{{ request.args.get('search', '') }}">
+		<button type="submit" class="btn btn-primary">Search</button>
+	</form>
+
+	<table class="table table-striped align-middle">
+		<thead class="table-light">
+			<tr>
+				{% set columns = [
+					('user_id', 'ID'),
+					('username', 'Username'),
+					('email', 'Email'),
+					('full_name', 'Full Name'),
+					('role', 'Role'),
+					('created_at', 'Created At')
+				] %}
+				{% for field, label in columns %}
+					<th class="fw-bold text-nowrap">
+						<a href="?sort={{ field }}&direction={{ 'desc' if sort == field and direction == 'asc' else 'asc' }}&search={{ request.args.get('search', '') }}"
+   							class="text-dark text-decoration-none text-nowrap">
+							{{ label }}
+							{% if sort == field %}
+								{{ '↑' if direction == 'asc' else '↓' }}
+							{% endif %}
+						</a>
+					</th>
+				{% endfor %}
+				<th class="fw-bold text-nowrap">Actions</th>
+			</tr>
+		</thead>
+		<tbody>
+			{% for user in users %}
+				<tr>
+					<td>{{ user.user_id }}</td>
+					<td>{{ user.username }}</td>
+					<td>{{ user.email }}</td>
+					<td>{{ user.full_name or '—' }}</td>
+					<td>{{ user.role }}</td>
+					<td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</td>
+					<td>
+						<a href="/users/delete/{{ user.user_id }}" class="btn btn-sm btn-danger">Delete</a>
+					</td>
+				</tr>
+			{% endfor %}
+		</tbody>
+	</table>
+</div>
+
+{% endblock %}

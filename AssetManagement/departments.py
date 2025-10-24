@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, Department, Employee
+from route_decorators import role_required
 
 department_bp = Blueprint("department", __name__)
 
 
 @department_bp.route("/departments", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def departments():
 	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
@@ -75,6 +77,7 @@ def departments():
 
 
 @department_bp.route("/departments/delete/<int:department_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_department(department_id):
 	record = Department.query.get(department_id)
 	if record:

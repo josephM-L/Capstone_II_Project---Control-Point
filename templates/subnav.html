@@ -19,6 +19,7 @@
     </ul>
 
     <!-- Right side: uncommon/advanced/admin dropdown -->
+    {% if session['role'] == 'manager' or session['role'] == 'admin' %}
     <ul class="navbar-nav d-flex flex-row">
       <li class="nav-item dropdown">
         <a class="nav-link dropdown-toggle d-flex align-items-center px-3 {% if current in [
@@ -46,6 +47,7 @@
         </ul>
       </li>
     </ul>
+    {% endif %}
 
   </div>
 </nav>

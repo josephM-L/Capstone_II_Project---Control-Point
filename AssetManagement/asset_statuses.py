@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, AssetStatus
+from route_decorators import role_required
 
 asset_status_bp = Blueprint("asset_status", __name__)
 
 
 @asset_status_bp.route("/asset_status", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def asset_statuses():
 	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
@@ -66,6 +68,7 @@ def asset_statuses():
 
 
 @asset_status_bp.route("/asset_status/delete/<int:status_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_asset_status(status_id):
 	record = AssetStatus.query.get(status_id)
 	if record:

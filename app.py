@@ -11,6 +11,7 @@ from AssetManagement.asset_assignments import asset_assignment_bp
 from AssetManagement.asset_maintenance import asset_maintenance_bp
 from AssetManagement.asset_disposals import asset_disposal_bp
 from MiscPages.login import login_bp
+from MiscPages.manage_users import users_bp
 from sqlalchemy import func
 from models import Asset, AssetStatus, Department, Employee
 app = Flask(__name__)
@@ -20,7 +21,6 @@ app.secret_key = "dev-secret"
 #connect to the DB
 #let Joseph know if the database can't connect, the IP probably changed
 
-#TODO add a user account with minimal privileges
 #Default Admin Account:
 user: str = "asset_admin"
 password: str = "CapstoneII"
@@ -89,6 +89,8 @@ def assets_by_department():
     except Exception as e:
         print("Error fetching department chart data:", e)
         return jsonify({"error": str(e)}), 500
+
+
 # Register all pages using blueprints
 app.register_blueprint(assets_bp)                # assets.py
 app.register_blueprint(asset_type_bp)            # asset_type.py
@@ -102,10 +104,13 @@ app.register_blueprint(asset_maintenance_bp)     # asset_maintenance.py
 app.register_blueprint(asset_disposal_bp)        # asset_disposals.py
 
 app.register_blueprint(login_bp)                 # login.py
+app.register_blueprint(users_bp)                 # login.py
 
 
 # run the app
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Ensures tables exist
+
+    #TODO TURN DEBUG OFF FOR OUR TEST DEPLOYMENT DURING PRESENTATION!!!
     app.run(debug=True)

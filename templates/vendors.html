@@ -6,6 +6,9 @@
 	{% include "subnav.html" %}
 {% endblock %}
 
+{% if session['role'] == 'manager' %}
+<h1>Vendors</h1>
+{% elif session['role'] == 'admin' %}
 <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
 	<h1>Vendors</h1>
 	<a href="#addVendorSection" id="toggleAddVendorBtn" class="btn btn-success"
@@ -64,6 +67,8 @@
 		</div>
 	</div>
 </div>
+{% endif %}
+
 
 <!-- Vendors Table -->
 <div class="collapse show" id="vendorTable">
@@ -99,7 +104,9 @@
 						</a>
 					</th>
 				{% endfor %}
+				{% if session['role'] == 'admin' %}
 				<th class="fw-bold text-nowrap">Actions</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -111,9 +118,11 @@
 					<td>{{ vendor.phone or '' }}</td>
 					<td>{{ vendor.email or '' }}</td>
 					<td>{{ vendor.address or '' }}</td>
+					{% if session['role'] == 'admin' %}
 					<td>
 						<a href="/vendors/delete/{{ vendor.vendor_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
+					{% endif %}
 				</tr>
 			{% endfor %}
 		</tbody>

@@ -3,11 +3,13 @@ from io import TextIOWrapper
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, Employee, Department
+from route_decorators import role_required
 
 employee_bp = Blueprint("employee", __name__)
 
 
 @employee_bp.route("/employees", methods=["GET", "POST"])
+@role_required("admin", "manager", "user")
 def employees():
 	if request.method == "POST":
 		# Reset auto increment
@@ -133,6 +135,7 @@ def employees():
 
 
 @employee_bp.route("/employees/delete/<int:employee_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_employee(employee_id):
 	employee = Employee.query.get(employee_id)
 	if employee:

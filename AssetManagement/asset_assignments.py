@@ -3,11 +3,13 @@ from io import TextIOWrapper
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, AssetAssignment, Asset, Employee
+from route_decorators import role_required
 
 asset_assignment_bp = Blueprint("asset_assignment", __name__)
 
 
 @asset_assignment_bp.route("/asset_assignments", methods=["GET", "POST"])
+@role_required("admin", "manager", "user")
 def asset_assignments():
 	if request.method == "POST":
 		# Reset auto increment
@@ -123,6 +125,7 @@ def asset_assignments():
 
 
 @asset_assignment_bp.route("/asset_assignments/delete/<int:assignment_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_asset_assignment(assignment_id):
 	assignment = AssetAssignment.query.get(assignment_id)
 	if assignment:

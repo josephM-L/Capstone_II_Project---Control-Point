@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, Vendor
+from route_decorators import role_required
 
 vendor_bp = Blueprint("vendor", __name__)
 
 
 @vendor_bp.route("/vendors", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def vendors():
 	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
@@ -79,6 +81,7 @@ def vendors():
 
 
 @vendor_bp.route("/vendors/delete/<int:vendor_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
 def delete_vendor(vendor_id):
 	record = Vendor.query.get(vendor_id)
 	if record:

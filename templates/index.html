@@ -8,10 +8,32 @@
 <h6>These links are for debug/testing, replace with proper homepage/dashboard later</h6>
 <p><a href="{{ url_for('assets.assets') }}">Manage Assets</a></p>
 <p><a href="{{ url_for('login.login') }}">Log In</a></p>
+<p><a href="{{ url_for('users.users') }}">Manage Users (REQUIRES ADMIN ACCOUNT)</a></p>
+
+<!-- Testing User Perms -->
+<ul>
+<b>
+	<li>Root account : user = root | pw = password</li>
+	<li>Manager account : user = manager | pw = password</li>
+	<li>User account : user = user | pw = password</li>
+</b>
+</ul>
+
+{% if session['role'] == 'admin' %}
+	<h2>Admin Dashboard</h2>
+	<p>You can manage all assets and users.</p>
+
+{% elif session['role'] == 'manager' %}
+	<h2>Manager Dashboard</h2>
+	<p>You can view and assign assets to employees.</p>
+
+{% else %}
+	<h2>User Dashboard</h2>
+	<p>You can view your assigned assets only.</p>
+{% endif %}
 
 
-
-#Charts
+<!-- Charts -->
 <h3>Assets by Status</h3>
 <canvas id="statusChart" style="max-width:450px; height:300px;"></canvas>
 

@@ -6,6 +6,9 @@
 	{% include "subnav.html" %}
 {% endblock %}
 
+{% if session['role'] == 'user' %}
+<h1>Assets</h1>
+{% elif session['role'] == 'manager' or session['role'] == 'admin' %}
 <div class="d-flex justify-content-between align-items-center mt-3 mb-3">
 	<h1>Assets</h1>
 	<a href="#addAssetSection" id="toggleAddAssetBtn" class="btn btn-success"
@@ -142,6 +145,8 @@
 	</div>
 </div>
 
+{% endif %}
+
 <!-- Assets Table -->
 <div class="collapse show" id="assetTable">
 
@@ -183,7 +188,9 @@
 						</a>
 					</th>
 				{% endfor %}
+				{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 				<th class="fw-bold text-nowrap">Actions</th>
+				{% endif %}
 			</tr>
 		</thead>
 		<tbody>
@@ -206,9 +213,11 @@
 							{{ asset.assigned_employee.first_name }} {{ asset.assigned_employee.last_name }}
 						{% endif %}
 					</td>
+					{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 					<td>
 						<a href="/assets/delete/{{ asset.asset_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
+					{% endif %}
 				</tr>
 			{% endfor %}
 		</tbody>
