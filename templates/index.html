@@ -2,45 +2,78 @@
 
 {% block title %}Home{% endblock %}
 {% block content %}
-
-<h1>Asset Manager!</h1>
-
-<h6>These links are for debug/testing, replace with proper homepage/dashboard later</h6>
-<p><a href="{{ url_for('assets.assets') }}">Manage Assets</a></p>
-<p><a href="{{ url_for('login.login') }}">Log In</a></p>
-<p><a href="{{ url_for('users.users') }}">Manage Users (REQUIRES ADMIN ACCOUNT)</a></p>
-
-<!-- Testing User Perms -->
-<ul>
-<b>
-	<li>Root account : user = root | pw = password</li>
-	<li>Manager account : user = manager | pw = password</li>
-	<li>User account : user = user | pw = password</li>
-</b>
-</ul>
-
-{% if session['role'] == 'admin' %}
-	<h2>Admin Dashboard</h2>
-	<p>You can manage all assets and users.</p>
-
-{% elif session['role'] == 'manager' %}
-	<h2>Manager Dashboard</h2>
-	<p>You can view and assign assets to employees.</p>
-
-{% else %}
-	<h2>User Dashboard</h2>
-	<p>You can view your assigned assets only.</p>
-{% endif %}
+<h1 class="text-center mt-3 mb-4">Asset Manager Dashboard</h1>
 
 
-<!-- Charts -->
-<h3>Assets by Status</h3>
-<canvas id="statusChart" style="max-width:450px; height:300px;"></canvas>
 
-<h3>Assets by Department</h3>
-<canvas id="departmentChart" style="max-width:450px; height:300px;"></canvas>
+<!-- Dashboard Overview -->
+<div class="dashboard container-fluid py-4">
+
+  <div class="row justify-content-center">
+
+    <!-- Assets by Status -->
+    <div class="col-md-5 col-lg-4 mb-4">
+      <div class="dashboard-card p-4 shadow-sm">
+        <h5 class="text-center mb-3">Assets by Status</h5>
+        <canvas id="statusChart" height="300"></canvas>
+      </div>
+    </div>
+
+    <!-- Assets by Department -->
+    <div class="col-md-5 col-lg-4 mb-4">
+      <div class="dashboard-card p-4 shadow-sm">
+        <h5 class="text-center mb-3">Assets by Department</h5>
+        <canvas id="departmentChart" height="250"></canvas>
+      </div>
+    </div>
+
+    <!-- Placeholder for future chart -->
+    <div class="col-md-5 col-lg-4 mb-4">
+      <div class="dashboard-card p-4 shadow-sm">
+        <h5 class="text-center mb-3">Assets by Type</h5>
+        <canvas id="typeChart" height="250"></canvas>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+
+
+<!-- Dashboard Styles -->
+<style>
+  body {
+    background-color: #f7f9fb;
+  }
+
+  .dashboard-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .dashboard-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.08);
+  }
+
+  h1 {
+    font-weight: 600;
+    color: #1e3a8a;
+  }
+
+  h5 {
+    font-weight: 500;
+    color: #374151;
+  }
+</style>
+
+
 
 <script>
 async function loadStatusChart() {
@@ -103,9 +136,57 @@ async function loadDepartmentChart() {
   });
 }
 
+// Future chart (placeholder)
+function loadTypeChart() {
+  const ctx = document.getElementById('typeChart');
+  new Chart(ctx, {
+    type: 'polarArea',
+    data: {
+      labels: ['Hardware', 'Software', 'Furniture'],
+      datasets: [{
+        data: [12, 7, 5],
+        backgroundColor: [
+          'rgba(59,130,246,0.7)',
+          'rgba(16,185,129,0.7)',
+          'rgba(239,68,68,0.7)'
+        ],
+        borderColor: '#fff',
+        borderWidth: 1
+      }]
+    },
+    options: {
+      plugins: { legend: { position: 'bottom' } }
+    }
+  });
+}
 
 loadStatusChart();
 loadDepartmentChart();
+loadTypeChart();
 </script>
+
+
+
+{% if session['role'] == 'admin' %}
+	<h2>Admin Dashboard</h2>
+	<p>You can manage all assets and users.</p>
+
+{% elif session['role'] == 'manager' %}
+	<h2>Manager Dashboard</h2>
+	<p>You can view and assign assets to employees.</p>
+
+{% else %}
+	<h2>User Dashboard</h2>
+	<p>You can view your assigned assets only.</p>
+{% endif %}
+
+<!-- Testing User Perms -->
+<ul>
+<b>
+	<li>Root account : user = root | pw = password</li>
+	<li>Manager account : user = manager | pw = password</li>
+	<li>User account : user = user | pw = password</li>
+</b>
+</ul>
 
 {% endblock %}
