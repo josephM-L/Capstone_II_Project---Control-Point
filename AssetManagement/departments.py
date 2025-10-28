@@ -85,6 +85,33 @@ def delete_department(department_id):
 		db.session.commit()
 	return redirect("/departments")
 
+@department_bp.route("/departments/edit/<int:department_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_department(department_id):
+	record = Department.query.get_or_404(department_id)
+
+	if request.method == "POST":
+		new_name = request.form.get("department_name", "").strip()
+		new_manager_id = request.form.get("manager_id")
+
+		if not new_name:
+			flash("Department name cannot be empty.", "danger")
+			return redirect("/departments")
+
+		try:
+			record.name = new_name
+			# Allow setting manager to None if the field is blank
+			record.manager_id = int(new_manager_id) if new_manager_id else None
+
+			db.session.commit()
+			flash("Department updated successfully!", "success")
+		except Exception as e:
+			db.session.rollback()
+			flash(f"Error updating department: {e}", "danger")
+
+	return redirect("/departments")
+
+
 
 # Search function
 def search_for(search):

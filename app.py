@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, flash
 from models import db
 from AssetManagement.assets import assets_bp
 from AssetManagement.asset_types import asset_type_bp

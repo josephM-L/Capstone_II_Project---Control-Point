@@ -76,6 +76,26 @@ def delete_asset_status(status_id):
 		db.session.commit()
 	return redirect("/asset_status")
 
+@asset_status_bp.route("/asset_status/edit/<int:status_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset_status(status_id):
+	record = AssetStatus.query.get_or_404(status_id)
+
+	new_name = request.form.get("status_name", "").strip()
+	if not new_name:
+		flash("Status name cannot be empty.", "danger")
+		return redirect("/asset_status")
+
+	try:
+		record.status_name = new_name
+		db.session.commit()
+		flash("Asset status updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating status: {e}", "danger")
+
+	return redirect("/asset_status")
+
 
 # Search function
 def search_for(search):
