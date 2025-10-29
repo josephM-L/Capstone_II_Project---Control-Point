@@ -107,9 +107,68 @@
 					<td>{{ user.role }}</td>
 					<td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</td>
 					<td>
+						<!-- Collapsible Button -->
+						<a class="btn btn-sm btn-secondary"
+						   data-bs-toggle="collapse"
+						   href="#editUser{{ user.user_id }}"
+						   role="button"
+						   aria-expanded="false"
+						   aria-controls="editUser{{ user.user_id }}">
+							Edit
+						</a>
+						<!-- Delete Button -->
 						<a href="/users/delete/{{ user.user_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
 				</tr>
+
+			<!-- Collapsible edit form row -->
+			<tr class="collapse" id="editUser{{ user.user_id }}">
+				<td colspan="5">
+					<div class="card card-body">
+						<form method="post" action="/users/edit/{{ user.user_id }}">
+							<div class="row g-3">
+								<div class="col-md-4">
+									<label for="username_{{ user.user_id }}" class="form-label">Username</label>
+									<input type="text" id="username_{{ user.user_id }}" name="username"
+										   class="form-control" value="{{ user.username }}" required>
+								</div>
+								<div class="col-md-4">
+									<label for="email_{{ user.user_id }}" class="form-label">Email</label>
+									<input type="email" id="email_{{ user.user_id }}" name="email"
+										   class="form-control" value="{{ user.email }}" required>
+								</div>
+								<div class="col-md-4">
+									<label for="full_name_{{ user.user_id }}" class="form-label">Full Name</label>
+									<input type="text" id="full_name_{{ user.user_id }}" name="full_name"
+										   class="form-control" value="{{ user.full_name }}">
+								</div>
+							</div>
+
+							<div class="row g-3 mt-2">
+								<div class="col-md-4">
+									<label for="role_{{ user.user_id }}" class="form-label">Role</label>
+									<select id="role_{{ user.user_id }}" name="role" class="form-select">
+										<option value="admin" {% if user.role == 'admin' %}selected{% endif %}>Admin</option>
+										<option value="manager" {% if user.role == 'manager' %}selected{% endif %}>Manager</option>
+										<option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
+									</select>
+								</div>
+								<div class="col-md-4">
+									<label for="password_{{ user.user_id }}" class="form-label">New Password (optional)</label>
+									<input type="password" id="password_{{ user.user_id }}" name="password"
+										   class="form-control" placeholder="Leave blank to keep current password">
+								</div>
+							</div>
+
+							<div class="mt-3">
+								<button type="submit" class="btn btn-sm btn-success">Save</button>
+							</div>
+						</form>
+					</div>
+				</td>
+			</tr>
+
+
 			{% endfor %}
 		</tbody>
 	</table>

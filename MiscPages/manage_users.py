@@ -94,6 +94,42 @@ def delete_user(user_id):
 	return redirect("/users")
 
 
+@users_bp.route("/users/edit/<int:user_id>", methods=["GET", "POST"])
+@role_required("admin")
+def edit_user(user_id):
+	user = User.query.get_or_404(user_id)
+
+	new_username = request.form.get("username", "").strip()
+	new_email = request.form.get("email", "").strip()
+	new_full_name = request.form.get("full_name", "").strip()
+	new_role = request.form.get("role", "").strip()
+	new_password = request.form.get("password", "").strip()
+
+	if not new_username or not new_email:
+		flash("Username and email cannot be empty.", "danger")
+		return redirect("/users")
+
+	try:
+		user.username = new_username
+		user.email = new_email
+		user.full_name = new_full_name
+		if new_role in ["admin", "manager", "user"]:
+			user.role = new_role
+
+		if new_password:
+			new_hash = generate_password_hash(new_password)
+			user.password_hash = new_hash
+
+		db.session.commit()
+		flash("User updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating user: {e}", "danger")
+
+	return redirect("/users")
+
+
+
 # Search function
 def search_for(search):
 	query = User.query
