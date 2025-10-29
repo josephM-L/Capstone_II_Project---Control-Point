@@ -87,6 +87,36 @@ def delete_location(location_id):
 	return redirect("/locations")
 
 
+@location_bp.route("/locations/edit/<int:location_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_location(location_id):
+	record = Location.query.get_or_404(location_id)
+
+	new_name = request.form.get("name", "").strip()
+	new_address = request.form.get("address", "").strip()
+	new_city = request.form.get("city", "").strip()
+	new_country = request.form.get("country", "").strip()
+
+	if not new_name:
+		flash("Location name cannot be empty.", "danger")
+		return redirect("/locations")
+
+	try:
+		record.name = new_name
+		record.address = new_address
+		record.city = new_city
+		record.country = new_country
+
+		db.session.commit()
+		flash("Location updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating location: {e}", "danger")
+
+	return redirect("/locations")
+
+
+
 # Search function
 def search_for(search):
 	query = Location.query

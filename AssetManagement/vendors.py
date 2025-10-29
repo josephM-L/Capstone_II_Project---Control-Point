@@ -90,6 +90,42 @@ def delete_vendor(vendor_id):
 	return redirect("/vendors")
 
 
+@vendor_bp.route("/vendors/edit/<int:vendor_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_vendor(vendor_id):
+	record = Vendor.query.get_or_404(vendor_id)
+
+	# Get updated form data
+	new_name = request.form.get("name", "").strip()
+	new_contact_name = request.form.get("contact_name", "").strip()
+	new_phone = request.form.get("phone", "").strip()
+	new_email = request.form.get("email", "").strip()
+	new_address = request.form.get("address", "").strip()
+
+	# Basic validation
+	if not new_name:
+		flash("Vendor name cannot be empty.", "danger")
+		return redirect("/vendors")
+
+	try:
+		# Apply updates
+		record.name = new_name
+		record.contact_name = new_contact_name
+		record.phone = new_phone
+		record.email = new_email
+		record.address = new_address
+
+		db.session.commit()
+		flash("Vendor updated successfully!", "success")
+
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating vendor: {e}", "danger")
+
+	return redirect("/vendors")
+
+
+
 # Search function
 def search_for(search):
 	query = Vendor.query

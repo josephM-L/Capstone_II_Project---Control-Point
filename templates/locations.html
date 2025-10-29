@@ -113,10 +113,61 @@
 					<td>{{ location.country or '' }}</td>
 					{% if session['role'] == 'admin' %}
 					<td>
+						<!-- Collapsible Button -->
+						<a class="btn btn-sm btn-secondary"
+						   data-bs-toggle="collapse"
+						   href="#editLocation{{ location.location_id }}"
+						   role="button"
+						   aria-expanded="false"
+						   aria-controls="editLocation{{ location.location_id }}">
+							Edit
+						</a>
+						<!-- Delete Button -->
 						<a href="/locations/delete/{{ location.location_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
 					{% endif %}
 				</tr>
+
+				<!-- Collapsible edit form row -->
+				<tr class="collapse" id="editLocation{{ location.location_id }}">
+					<td colspan="5">
+						<div class="card card-body">
+							<form method="post" action="/locations/edit/{{ location.location_id }}">
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label for="name_{{ location.location_id }}" class="form-label">Location Name</label>
+										<input type="text" id="name_{{ location.location_id }}" name="name"
+											   class="form-control" value="{{ location.name }}" required>
+									</div>
+
+									<div class="col-md-6">
+										<label for="address_{{ location.location_id }}" class="form-label">Address</label>
+										<input type="text" id="address_{{ location.location_id }}" name="address"
+											   class="form-control" value="{{ location.address }}">
+									</div>
+
+									<div class="col-md-6">
+										<label for="city_{{ location.location_id }}" class="form-label">City</label>
+										<input type="text" id="city_{{ location.location_id }}" name="city"
+											   class="form-control" value="{{ location.city }}">
+									</div>
+
+									<div class="col-md-6">
+										<label for="country_{{ location.location_id }}" class="form-label">Country</label>
+										<input type="text" id="country_{{ location.location_id }}" name="country"
+											   class="form-control" value="{{ location.country }}">
+									</div>
+								</div>
+
+								<div class="mt-3">
+									<button type="submit" class="btn btn-sm btn-success">Save</button>
+								</div>
+							</form>
+						</div>
+					</td>
+				</tr>
+
+
 			{% endfor %}
 		</tbody>
 	</table>

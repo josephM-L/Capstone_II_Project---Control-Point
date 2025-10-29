@@ -109,10 +109,60 @@
 					<td>{{ asset_type.description or '' }}</td>
 					{% if session['role'] == 'admin' %}
 					<td>
+						<!-- Collapsible Button -->
+						<a class="btn btn-sm btn-secondary"
+						   data-bs-toggle="collapse"
+						   href="#editAssetType{{ asset_type.asset_type_id }}"
+						   role="button"
+						   aria-expanded="false"
+						   aria-controls="editAssetType{{ asset_type.asset_type_id }}">
+							Edit
+						</a>
+						<!-- Delete Button -->
 						<a href="/asset_type/delete/{{ asset_type.asset_type_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
 					{% endif %}
 				</tr>
+
+				<!-- Collapsible edit form row -->
+				<tr class="collapse" id="editAssetType{{ asset_type.asset_type_id }}">
+					<td colspan="4">
+						<div class="card card-body">
+							<form method="post" action="/asset_type/edit/{{ asset_type.asset_type_id }}">
+								<div class="row g-3">
+									<!-- Name -->
+									<div class="col-md-6">
+										<label for="name_{{ asset_type.asset_type_id }}" class="form-label">Type Name</label>
+										<input type="text" id="name_{{ asset_type.asset_type_id }}" name="name"
+											   class="form-control" value="{{ asset_type.name }}" required>
+									</div>
+
+									<!-- Category -->
+									<div class="col-md-6">
+										<label for="category_{{ asset_type.asset_type_id }}" class="form-label">Category</label>
+										<select id="category_{{ asset_type.asset_type_id }}" name="category" class="form-select" required>
+											<option value="Tangible" {% if asset_type.category == 'Tangible' %}selected{% endif %}>Tangible</option>
+											<option value="Intangible" {% if asset_type.category == 'Intangible' %}selected{% endif %}>Intangible</option>
+										</select>
+									</div>
+
+									<!-- Description -->
+									<div class="col-12">
+										<label for="description_{{ asset_type.asset_type_id }}" class="form-label">Description</label>
+										<textarea id="description_{{ asset_type.asset_type_id }}" name="description"
+												  class="form-control" rows="3">{{ asset_type.description }}</textarea>
+									</div>
+								</div>
+
+								<div class="mt-3">
+									<button type="submit" class="btn btn-sm btn-success">Save</button>
+								</div>
+							</form>
+						</div>
+					</td>
+				</tr>
+
+
 			{% endfor %}
 		</tbody>
 	</table>

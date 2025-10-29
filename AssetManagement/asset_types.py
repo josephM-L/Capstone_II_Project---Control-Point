@@ -82,6 +82,34 @@ def delete_asset_type(asset_type_id):
 		db.session.commit()
 	return redirect("/asset_type")
 
+
+@asset_type_bp.route("/asset_type/edit/<int:asset_type_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset_type(asset_type_id):
+	record = AssetType.query.get_or_404(asset_type_id)
+
+	new_name = request.form.get("name", "").strip()
+	new_category = request.form.get("category", "").strip()
+	new_description = request.form.get("description", "").strip()
+
+	if not new_name:
+		flash("Type name cannot be empty.", "danger")
+		return redirect("/asset_type")
+
+	try:
+		record.name = new_name
+		record.category = new_category
+		record.description = new_description
+		db.session.commit()
+		flash("Asset type updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating asset type: {e}", "danger")
+
+	return redirect("/asset_type")
+
+
+
 # Search function
 def search_for(search):
 	query = AssetType.query
@@ -94,3 +122,5 @@ def search_for(search):
 			(AssetType.description.ilike(search_pattern))
 		)
 	return query
+
+
