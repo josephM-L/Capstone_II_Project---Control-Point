@@ -132,6 +132,39 @@ def delete_asset_disposal(disposal_id):
 		db.session.commit()
 	return redirect("/asset_disposals")
 
+@asset_disposal_bp.route("/asset_disposals/edit/<int:disposal_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset_disposal(disposal_id):
+	record = AssetDisposal.query.get_or_404(disposal_id)
+
+	if request.method == "POST":
+		disposal_date = request.form.get("disposal_date")
+		method = request.form.get("method")
+		sale_value = request.form.get("sale_value")
+		notes = request.form.get("notes", "").strip()
+
+		if not disposal_date or not method:
+			flash("Disposal date and method cannot be empty.", "danger")
+			return redirect("/asset_disposals")
+
+		try:
+			record.disposal_date = disposal_date
+			record.method = method
+			record.sale_value = sale_value or None
+			record.notes = notes or None
+
+			db.session.commit()
+			flash("Asset disposal record updated successfully!", "success")
+		except Exception as e:
+			db.session.rollback()
+			flash(f"Error updating disposal record: {e}", "danger")
+
+		return redirect("/asset_disposals")
+
+	return render_template("disposals/edit_disposal.html", disposal=record)
+
+
+
 # Search function
 def search_for(search):
 	query = AssetDisposal.query.join(Asset, AssetDisposal.asset_id == Asset.asset_id)

@@ -143,6 +143,42 @@ def delete_employee(employee_id):
 		db.session.commit()
 	return redirect("/employees")
 
+@employee_bp.route("/employees/edit/<int:employee_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_employee(employee_id):
+	record = Employee.query.get_or_404(employee_id)
+
+	first_name = request.form.get("first_name", "").strip()
+	last_name = request.form.get("last_name", "").strip()
+	email = request.form.get("email", "").strip()
+	phone = request.form.get("phone", "").strip()
+	department_id = request.form.get("department_id")
+	role = request.form.get("role", "").strip()
+	status = request.form.get("status", "Active")
+
+	if not first_name or not last_name or not email:
+		flash("First name, last name, and email are required.", "danger")
+		return redirect("/employees")
+
+	try:
+		record.first_name = first_name
+		record.last_name = last_name
+		record.email = email
+		record.phone = phone
+		record.department_id = department_id if department_id else None
+		record.role = role
+		record.status = status
+
+		db.session.commit()
+		flash("Employee updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating employee: {e}", "danger")
+
+	return redirect("/employees")
+
+
+
 # Search function
 def search_for(search):
 	query = Employee.query

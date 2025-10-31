@@ -219,26 +219,73 @@ def delete_asset(asset_id):
 		db.session.commit()
 	return redirect("/assets")
 
+@assets_bp.route("/assets/edit/<int:asset_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset(asset_id):
+	asset = Asset.query.get_or_404(asset_id)
+
+	if request.method == "POST":
+		asset_tag = request.form.get("asset_tag", "").strip()
+		name = request.form.get("name", "").strip()
+		description = request.form.get("description", "").strip()
+		asset_type_id = request.form.get("asset_type_id")
+		status_id = request.form.get("status_id")
+		location_id = request.form.get("location_id")
+		assigned_to = request.form.get("assigned_to")
+		purchase_date = request.form.get("purchase_date")
+		purchase_cost = request.form.get("purchase_cost")
+		vendor_id = request.form.get("vendor_id")
+		warranty_expiry = request.form.get("warranty_expiry")
+		serial_number = request.form.get("serial_number", "").strip()
+
+		# Basic validation
+		if not asset_tag or not name:
+			flash("Asset tag and name cannot be empty.", "danger")
+			return redirect("/assets")
+
+		try:
+			asset.asset_tag = asset_tag
+			asset.name = name
+			asset.description = description or None
+			asset.asset_type_id = asset_type_id or None
+			asset.status_id = status_id or None
+			asset.location_id = location_id or None
+			asset.assigned_to = assigned_to or None
+			asset.purchase_date = purchase_date or None
+			asset.purchase_cost = purchase_cost or None
+			asset.vendor_id = vendor_id or None
+			asset.warranty_expiry = warranty_expiry or None
+			asset.serial_number = serial_number or None
+
+			db.session.commit()
+			flash("Asset updated successfully!", "success")
+		except Exception as e:
+			db.session.rollback()
+			flash(f"Error updating asset: {e}", "danger")
+
+		return redirect("/assets")
+
+	# If GET request, render the edit page (optional)
+	return render_template("assets/edit_asset.html", asset=asset)
 
 
 # Search function
 def search_for(search):
-	query = Asset.query
+	query = Asset.query.join(Vendor, isouter=True).join(Location, isouter=True).join(AssetType, isouter=True)
 	if search:
 		search_pattern = f"%{search}%"
 		query = query.filter(
-			(Asset.asset_id.ilike(search_pattern)) |
-			(Asset.name.ilike(search_pattern)) |
-			(Asset.description.ilike(search_pattern)) |
-			(Asset.asset_type_id.ilike(search_pattern)) |
-			(Asset.status_id.ilike(search_pattern)) |
-			(Asset.location_id.ilike(search_pattern)) |
-			(Asset.assigned_to.ilike(search_pattern)) |
-			(Asset.purchase_date.ilike(search_pattern)) |
-			(Asset.purchase_cost.ilike(search_pattern)) |
-			(Asset.vendor_id.ilike(search_pattern)) |
-			(Asset.warranty_expiry.ilike(search_pattern)) |
-			(Asset.serial_number.ilike(search_pattern))
+			db.or_(
+				Asset.asset_tag.ilike(search_pattern),
+				Asset.name.ilike(search_pattern),
+				Asset.description.ilike(search_pattern),
+				Asset.serial_number.ilike(search_pattern),
+				db.cast(Asset.purchase_date, db.String).ilike(search_pattern),
+				db.cast(Asset.purchase_cost, db.String).ilike(search_pattern),
+				db.cast(Asset.warranty_expiry, db.String).ilike(search_pattern),
+				Vendor.name.ilike(search_pattern),
+				Location.name.ilike(search_pattern),
+				AssetType.name.ilike(search_pattern)
+			)
 		)
-
 	return query

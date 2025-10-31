@@ -136,6 +136,40 @@ def delete_asset_maintenance(maintenance_id):
 		db.session.commit()
 	return redirect("/asset_maintenance")
 
+@asset_maintenance_bp.route("/asset_maintenance/edit/<int:maintenance_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset_maintenance(maintenance_id):
+	record = AssetMaintenance.query.get_or_404(maintenance_id)
+
+	# Collect form data
+	maintenance_date = request.form.get("maintenance_date")
+	description = request.form.get("description", "").strip()
+	performed_by = request.form.get("performed_by", "").strip()
+	cost = request.form.get("cost")
+	next_due_date = request.form.get("next_due_date")
+
+	# Basic validation
+	if not maintenance_date:
+		flash("Maintenance date cannot be empty.", "danger")
+		return redirect("/asset_maintenance")
+
+	try:
+		record.maintenance_date = maintenance_date
+		record.description = description or None
+		record.performed_by = performed_by or None
+		record.cost = cost or None
+		record.next_due_date = next_due_date or None
+
+		db.session.commit()
+		flash("Maintenance record updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating maintenance record: {e}", "danger")
+
+	return redirect("/asset_maintenance")
+
+
+
 # Search function
 def search_for(search):
 	query = AssetMaintenance.query.join(Asset, AssetMaintenance.asset_id == Asset.asset_id)

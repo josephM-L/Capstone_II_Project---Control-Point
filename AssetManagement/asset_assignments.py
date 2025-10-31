@@ -133,6 +133,37 @@ def delete_asset_assignment(assignment_id):
 		db.session.commit()
 	return redirect("/asset_assignments")
 
+@asset_assignment_bp.route("/asset_assignments/edit/<int:assignment_id>", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def edit_asset_assignment(assignment_id):
+	record = AssetAssignment.query.get_or_404(assignment_id)
+
+	# Collect form data
+	asset_id = request.form.get("asset_id")
+	employee_id = request.form.get("employee_id")
+	assigned_date = request.form.get("assigned_date")
+	returned_date = request.form.get("returned_date")
+
+	# Basic validation
+	if not asset_id or not employee_id or not assigned_date:
+		flash("Asset, employee, and assigned date cannot be empty.", "danger")
+		return redirect("/asset_assignments")
+
+	try:
+		record.asset_id = asset_id
+		record.employee_id = employee_id
+		record.assigned_date = assigned_date
+		record.returned_date = returned_date or None
+
+		db.session.commit()
+		flash("Assignment updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating assignment: {e}", "danger")
+
+	return redirect("/asset_assignments")
+
+
 # Search function
 def search_for(search):
 	# Create a join to query assetassignment, asset, and employee tables

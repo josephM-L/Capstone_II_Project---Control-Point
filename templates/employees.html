@@ -140,10 +140,88 @@
 					<td>{{ employee.status }}</td>
 					{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 					<td>
+						<!-- Collapsible Button -->
+						<a class="btn btn-sm btn-secondary"
+						   data-bs-toggle="collapse"
+						   href="#editEmployee{{ employee.employee_id }}"
+						   role="button"
+						   aria-expanded="false"
+						   aria-controls="editEmployee{{ employee.employee_id }}">
+							Edit
+						</a>
+						<!-- Delete Button -->
 						<a href="/employees/delete/{{ employee.employee_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
 					{% endif %}
 				</tr>
+
+				<!-- Collapsible edit form row -->
+				<tr class="collapse" id="editEmployee{{ employee.employee_id }}">
+					<td colspan="7">
+						<div class="card card-body">
+							<form method="post" action="/employees/edit/{{ employee.employee_id }}">
+								<div class="row g-3">
+									<div class="col-md-6">
+										<label for="first_name_{{ employee.employee_id }}" class="form-label">First Name</label>
+										<input type="text" id="first_name_{{ employee.employee_id }}" name="first_name"
+											   class="form-control" value="{{ employee.first_name }}" required>
+									</div>
+
+									<div class="col-md-6">
+										<label for="last_name_{{ employee.employee_id }}" class="form-label">Last Name</label>
+										<input type="text" id="last_name_{{ employee.employee_id }}" name="last_name"
+											   class="form-control" value="{{ employee.last_name }}" required>
+									</div>
+
+									<div class="col-md-6">
+										<label for="email_{{ employee.employee_id }}" class="form-label">Email</label>
+										<input type="email" id="email_{{ employee.employee_id }}" name="email"
+											   class="form-control" value="{{ employee.email }}" required>
+									</div>
+
+									<div class="col-md-6">
+										<label for="phone_{{ employee.employee_id }}" class="form-label">Phone</label>
+										<input type="text" id="phone_{{ employee.employee_id }}" name="phone"
+											   class="form-control" value="{{ employee.phone }}">
+									</div>
+
+									 <div class="col-md-6">
+										<label for="department_id_{{ employee.employee_id }}" class="form-label">Department</label>
+										<select id="department_id_{{ employee.employee_id }}" name="department_id" class="form-select" >
+										<option value="">-- No Department --</option>
+											{% for d in departments %}
+												<option value="{{ d.department_id }}"
+														{% if employee.department_id == d.department_id %}selected{% endif %}>
+														{{ d.name }}
+												</option>
+											{% endfor %}
+										</select>
+									</div>
+
+									<div class="col-md-6">
+										<label for="role_{{ employee.employee_id }}" class="form-label">Role</label>
+										<input type="text" id="role_{{ employee.employee_id }}" name="role"
+											   class="form-control" value="{{ employee.role }}">
+									</div>
+
+									<div class="col-md-6">
+										<label for="status_{{ employee.employee_id }}" class="form-label">Status</label>
+										<select id="status_{{ employee.employee_id }}" name="status" class="form-select">
+											<option value="Active" {% if employee.status == 'Active' %}selected{% endif %}>Active</option>
+											<option value="Inactive" {% if employee.status == 'Inactive' %}selected{% endif %}>Inactive</option>
+										</select>
+									</div>
+								</div>
+
+								<div class="mt-3">
+									<button type="submit" class="btn btn-sm btn-success">Save</button>
+								</div>
+							</form>
+						</div>
+					</td>
+				</tr>
+
+
 			{% endfor %}
 		</tbody>
 	</table>

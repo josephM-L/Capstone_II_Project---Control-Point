@@ -115,16 +115,86 @@
 			{% for assignment in assignments %}
 				<tr>
 					<td>{{ assignment.assignment_id }}</td>
-					<td>{{ assignment.asset.asset_tag }}</td>
+					<td><a href="{{ url_for('assets.assets', search=assignment.asset.asset_tag) }}">
+						{{ assignment.asset.asset_tag }}
+					</a></td>
 					<td>{{ assignment.employee.first_name }} {{ assignment.employee.last_name }}</td>
 					<td>{{ assignment.assigned_date }}</td>
 					<td>{{ assignment.returned_date or '' }}</td>
 					{% if session['role'] == 'manager' or session['role'] == 'admin' %}
 					<td>
+							<!-- Collapsible Button -->
+						<a class="btn btn-sm btn-secondary"
+						   data-bs-toggle="collapse"
+						   href="#editAssetAssignment{{ assignment.assignment_id }}"
+						   role="button"
+						   aria-expanded="false"
+						   aria-controls="editAssetAssignment{{ assignment.assignment_id }}">
+							Edit
+						</a>
+						<!-- Delete Button -->
 						<a href="/asset_assignments/delete/{{ assignment.assignment_id }}" class="btn btn-sm btn-danger">Delete</a>
 					</td>
 					{% endif %}
 				</tr>
+
+				<!-- Collapsible edit form row -->
+				<tr class="collapse" id="editAssetAssignment{{ assignment.assignment_id }}">
+					<td colspan="3">
+						<div class="card card-body">
+							<form method="post" action="/asset_assignments/edit/{{ assignment.assignment_id }}">
+								<div class="row g-3">
+
+									<!-- Asset selection -->
+									<div class="col-md-6">
+										<label for="asset_id_{{ assignment.assignment_id }}" class="form-label">Asset</label>
+										<select id="asset_id_{{ assignment.assignment_id }}" name="asset_id" class="form-select" required>
+											{% for asset in assets %}
+												<option value="{{ asset.asset_id }}"
+													{% if assignment.asset_id == asset.asset_id %}selected{% endif %}>
+													{{ asset.asset_tag }} - {{ asset.name }}
+												</option>
+											{% endfor %}
+										</select>
+									</div>
+
+									<!-- Employee selection -->
+									<div class="col-md-6">
+										<label for="employee_id_{{ assignment.assignment_id }}" class="form-label">Employee</label>
+										<select id="employee_id_{{ assignment.assignment_id }}" name="employee_id" class="form-select" required>
+											{% for emp in employees %}
+												<option value="{{ emp.employee_id }}"
+													{% if assignment.employee_id == emp.employee_id %}selected{% endif %}>
+													{{ emp.first_name }} {{ emp.last_name }}
+												</option>
+											{% endfor %}
+										</select>
+									</div>
+
+									<!-- Assigned date -->
+									<div class="col-md-6">
+										<label for="assigned_date_{{ assignment.assignment_id }}" class="form-label">Assigned Date</label>
+										<input type="date" id="assigned_date_{{ assignment.assignment_id }}" name="assigned_date"
+											   class="form-control" value="{{ assignment.assigned_date }}" required>
+									</div>
+
+									<!-- Returned date -->
+									<div class="col-md-6">
+										<label for="returned_date_{{ assignment.assignment_id }}" class="form-label">Returned Date</label>
+										<input type="date" id="returned_date_{{ assignment.assignment_id }}" name="returned_date"
+											   class="form-control" value="{{ assignment.returned_date or '' }}">
+									</div>
+								</div>
+
+								<div class="mt-3">
+									<button type="submit" class="btn btn-sm btn-success">Save</button>
+								</div>
+							</form>
+						</div>
+					</td>
+				</tr>
+
+
 			{% endfor %}
 		</tbody>
 	</table>
