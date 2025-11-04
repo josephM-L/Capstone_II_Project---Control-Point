@@ -34,16 +34,16 @@
     </ul>
 
     <!-- Right side username / login/logout -->
-    <ul class="navbar-nav ms-auto flex-row">
+    <ul class="navbar-nav ms-auto d-flex align-items-center">
       {% if session.get('username') %}
-        <li class="nav-item">
+        <li class="nav-item d-flex align-items-center">
           <span class="navbar-text text-white px-2">Hello, {{ session.username }}!</span>
         </li>
-        <li class="nav-item">
+        <li class="nav-item d-flex align-items-center">
           <a class="nav-link px-2" href="{{ url_for('login.logout') }}">Logout</a>
         </li>
       {% else %}
-        <li class="nav-item">
+        <li class="nav-item d-flex align-items-center">
           <a class="nav-link px-2" href="{{ url_for('login.login') }}">Login</a>
         </li>
       {% endif %}
