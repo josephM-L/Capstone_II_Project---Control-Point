@@ -13,7 +13,7 @@ from AssetManagement.asset_disposals import asset_disposal_bp
 from MiscPages.login import login_bp
 from MiscPages.manage_users import users_bp
 from sqlalchemy import func
-from models import Asset, AssetStatus, Department, Employee
+from models import Asset, AssetStatus, Department, Employee, Vendor, User, AssetType
 app = Flask(__name__)
 #TODO use something like import os to generate this later for security
 app.secret_key = "dev-secret"
@@ -69,27 +69,50 @@ def assets_by_status():
         print("Error fetching chart data:", e)
         return jsonify({"error": str(e)}), 500
 
-@app.route('/chart-data/assets-by-department')
-def assets_by_department():
+@app.route('/chart-data/assets-by-vendor')
+def assets_by_vendor():
     try:
         results = (
             db.session.query(
-                Department.name.label('department'),
+                Vendor.name.label('vendor'),
                 func.count(Asset.asset_id).label('count')
             )
-            .join(Employee, Employee.department_id == Department.department_id)
-            .join(Asset, Asset.assigned_to == Employee.employee_id)
-            .group_by(Department.name)
+            .outerjoin(Asset, Asset.vendor_id == Vendor.vendor_id)
+            .group_by(Vendor.name)
+            .order_by(func.count(Asset.asset_id).desc())
             .all()
         )
 
-        data = [{"department": r.department, "count": r.count} for r in results]
+        data = [{"vendor": r.vendor, "count": r.count} for r in results]
         return jsonify(data)
 
     except Exception as e:
-        print("Error fetching department chart data:", e)
-        return jsonify({"error": str(e)}), 500
+        app.logger.error(f"Error fetching vendor chart data: {e}")
+        return jsonify({"error": "Internal server error"}), 500
 
+
+@app.route('/chart-data/assets-by-type')
+def assets_by_type():
+    try:
+        results = (
+            db.session.query(
+                AssetType.name.label('type'),
+                func.count(Asset.asset_id).label('count')
+            )
+            .join(Asset, Asset.asset_type_id == AssetType.asset_type_id)
+            .group_by(AssetType.name)
+            .order_by(func.count(Asset.asset_id).desc())
+            .all()
+        )
+
+        data = [{"type": r.type, "count": r.count} for r in results]
+        return jsonify(data)
+
+    except Exception as e:
+        import traceback
+        print("Exception in /chart-data/assets-by-type:")
+        traceback.print_exc()
+        return jsonify({"error": str(e)}), 500
 
 # Register all pages using blueprints
 app.register_blueprint(assets_bp)                # assets.py

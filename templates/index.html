@@ -19,15 +19,15 @@
       </div>
     </div>
 
-    <!-- Assets by Department -->
+    <!-- Assets by Vendor -->
     <div class="col-md-5 col-lg-4 mb-4">
       <div class="dashboard-card p-4 shadow-sm">
-        <h5 class="text-center mb-3">Assets by Department</h5>
-        <canvas id="departmentChart" height="250"></canvas>
+        <h5 class="text-center mb-3">Assets by Vendor</h5>
+        <canvas id="vendorChart" height="250"></canvas>
       </div>
     </div>
 
-    <!-- Placeholder for future chart -->
+   <!-- Assets by Department -->
     <div class="col-md-5 col-lg-4 mb-4">
       <div class="dashboard-card p-4 shadow-sm">
         <h5 class="text-center mb-3">Assets by Type</h5>
@@ -102,66 +102,95 @@ async function loadStatusChart() {
   });
 }
 
-async function loadDepartmentChart() {
-  const response = await fetch("/chart-data/assets-by-department");
+async function loadVendorChart() {
+  const response = await fetch("/chart-data/assets-by-vendor");
   const data = await response.json();
 
-  const labels = data.map(item => item.department);
+  const labels = data.map(item => item.vendor);
   const values = data.map(item => item.count);
 
-  const ctx = document.getElementById('departmentChart');
+  const ctx = document.getElementById('vendorChart');
   new Chart(ctx, {
-    type: 'pie',
+    type: 'doughnut',
     data: {
       labels: labels,
       datasets: [{
-        label: 'Assets per Department',
+        label: 'Assets per Vendor',
         data: values,
         backgroundColor: [
-          'rgba(245,99,255,0.73)',
-          'rgba(54,162,235,0.54)',
+          'rgba(245, 99, 255, 0.73)',
+          'rgba(54, 162, 235, 0.54)',
           'rgba(255, 206, 86, 0.6)',
           'rgba(75, 192, 192, 0.6)',
-          'rgba(153, 102, 255, 0.6)'
+          'rgba(153, 102, 255, 0.6)',
+          'rgba(255, 159, 64, 0.6)',
+          'rgba(99, 255, 132, 0.6)'
         ],
         borderColor: 'rgba(255,255,255,1)',
-        borderWidth: 1
+        borderWidth: 3
       }]
     },
     options: {
+        cutout: '60%',
       plugins: {
-        legend: { position: 'top' }
+        legend: { position: 'top' },
+        title: {
+          display: true,
+          text: 'Assets by Vendor'
+        }
       }
     }
   });
 }
 
-// Future chart (placeholder)
-function loadTypeChart() {
+
+
+async function loadTypeChart() {
+  const response = await fetch("/chart-data/assets-by-type");
+  const data = await response.json();
+
+  if (!data.length) {
+    document.getElementById('typeChart').replaceWith('No asset type data available');
+    return;
+  }
+
+  const labels = data.map(item => item.type);
+  const values = data.map(item => Number(item.count));
+
   const ctx = document.getElementById('typeChart');
   new Chart(ctx, {
     type: 'polarArea',
     data: {
-      labels: ['Hardware', 'Software', 'Furniture'],
+      labels: labels,
       datasets: [{
-        data: [12, 7, 5],
+        data: values,
         backgroundColor: [
           'rgba(59,130,246,0.7)',
           'rgba(16,185,129,0.7)',
-          'rgba(239,68,68,0.7)'
+          'rgba(239,68,68,0.7)',
+          'rgba(234,179,8,0.7)',
+          'rgba(147,51,234,0.7)'
         ],
         borderColor: '#fff',
-        borderWidth: 1
+        borderWidth: 2
       }]
     },
     options: {
-      plugins: { legend: { position: 'bottom' } }
+      plugins: {
+        legend: { position: 'bottom' },
+        title: {
+          display: true,
+          text: 'Assets by Type'
+        }
+      }
     }
   });
 }
 
+
+
 loadStatusChart();
-loadDepartmentChart();
+loadVendorChart();
 loadTypeChart();
 </script>
 
