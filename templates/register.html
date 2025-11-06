@@ -3,18 +3,15 @@
 
 {% block content %}
 
-{% block subnav %}
-{% include "subnav.html" %}
-{% endblock %}
 
 <h1>Create Account</h1>
 
 {% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, msg in messages %}
-      <div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
-    {% endfor %}
-  {% endif %}
+	{% if messages %}
+		{% for category, msg in messages %}
+			<div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+		{% endfor %}
+	{% endif %}
 {% endwith %}
 
 <form method="post" class="mt-3">

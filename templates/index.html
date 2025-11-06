@@ -2,6 +2,16 @@
 
 {% block title %}Home{% endblock %}
 {% block content %}
+
+{% with messages = get_flashed_messages(with_categories=true) %}
+	{% if messages %}
+		{% for category, msg in messages %}
+			<div class="alert alert-{{ category }} mt-2">{{ msg }}</div>
+		{% endfor %}
+	{% endif %}
+{% endwith %}
+
+
 <h1 class="text-center mt-3 mb-4">Dashboard</h1>
 
 
