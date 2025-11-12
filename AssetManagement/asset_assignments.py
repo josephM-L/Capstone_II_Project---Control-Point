@@ -76,6 +76,12 @@ def asset_assignments():
 			)
 
 			db.session.add(new_assignment)
+
+			# Update Assets Table
+			asset = Asset.query.get(asset_id)
+			if asset:
+				asset.assigned_to = employee_id
+
 			db.session.commit()
 			flash("Asset assignment added successfully!", "success")
 			return redirect("/asset_assignments")
@@ -154,6 +160,11 @@ def edit_asset_assignment(assignment_id):
 		record.employee_id = employee_id
 		record.assigned_date = assigned_date
 		record.returned_date = returned_date or None
+
+		# Update Assets Table
+		asset = Asset.query.get(asset_id)
+		if asset:
+			asset.assigned_to = employee_id
 
 		db.session.commit()
 		flash("Assignment updated successfully!", "success")

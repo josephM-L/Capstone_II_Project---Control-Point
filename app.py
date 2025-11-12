@@ -1,5 +1,5 @@
-from flask import Flask, render_template, jsonify, flash
-from models import db
+from flask import Flask, render_template, jsonify, flash, session
+from models import db, Location
 from AssetManagement.assets import assets_bp
 from AssetManagement.asset_types import asset_type_bp
 from AssetManagement.asset_statuses import asset_status_bp
@@ -41,10 +41,46 @@ app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 # Init the DB from the models.py file
 db.init_app(app)
 
-# Define the index page (home page)
+# Define the index page (home page/dashboard)
 @app.route('/')
 def index():
-    return render_template('index.html')
+    if "username" in session:
+        username = session.get('username')
+        user = User.query.filter_by(username=username).first() if username else ""
+
+        if not user or not user.employee_id:
+            flash("No linked employee record found.", "warning")
+
+        employee = Employee.query.get(user.employee_id) if user and user.employee_id else None
+        first_name = employee.first_name if employee else None
+        last_name = employee.last_name if employee else None
+        full_name = f"{first_name} {last_name}"
+
+        # Filter assets based on employee full name
+        if user and user.employee_id:
+            employee = Employee.query.get(user.employee_id)
+            first_name = employee.first_name
+            last_name = employee.last_name
+            full_name = f"{first_name} {last_name}"
+
+            assets = (
+                Asset.query
+                .filter_by(assigned_to=employee.employee_id)
+                .options(
+                    db.joinedload(Asset.status),
+                    db.joinedload(Asset.location),
+                )
+                .all()
+            )
+        else:
+            employee = None
+            full_name = "SYSTEM"
+            assets = []
+
+        return render_template('index.html', full_name=full_name, assets=assets)
+    else:
+        return render_template('index.html', full_name="", assets=[])
+
 
 
 

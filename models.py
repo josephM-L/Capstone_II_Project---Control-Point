@@ -44,7 +44,8 @@ class Employee(db.Model):
 
     department = db.relationship("Department", back_populates="employees", foreign_keys=[department_id], passive_deletes=True)
 
-    assignments = db.relationship("AssetAssignment", back_populates="employee", passive_deletes=True)
+    assignments = db.relationship("AssetAssignment", back_populates="employee", cascade="all, delete-orphan")
+    user = db.relationship("User", back_populates="employee", uselist=False)
     assigned_assets = db.relationship("Asset", back_populates="assigned_employee")
 
 
@@ -103,7 +104,7 @@ class Asset(db.Model):
 class AssetAssignment(db.Model):
     __tablename__ = "asset_assignments"
     assignment_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    asset_id = db.Column(db.Integer, db.ForeignKey("assets.asset_id", ondelete="CASCADE"))
+    asset_id = db.Column(db.Integer, db.ForeignKey("assets.asset_id", ondelete="SET NULL"))
     employee_id = db.Column(db.Integer, db.ForeignKey("employees.employee_id", ondelete="CASCADE"))
     assigned_date = db.Column(db.Date, nullable=False)
     returned_date = db.Column(db.Date)
@@ -145,4 +146,7 @@ class User(db.Model):
     password_hash = db.Column(db.String(255), nullable=False)
     full_name = db.Column(db.String(150))
     role = db.Column(db.Enum("admin", "manager", "user"), default="user", nullable=False)
+    employee_id = db.Column(db.Integer, db.ForeignKey("employees.employee_id", ondelete="CASCADE"))
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    employee = db.relationship("Employee", back_populates="user", cascade="all, delete-orphan", single_parent=True)

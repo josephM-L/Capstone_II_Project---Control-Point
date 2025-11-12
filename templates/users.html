@@ -35,10 +35,12 @@
 						<label for="email" class="form-label">Email *</label>
 						<input type="email" id="email" name="email" class="form-control" required>
 					</div>
+					<!-- DEPRECATED
 					<div class="col-md-6">
 						<label for="full_name" class="form-label">Full Name</label>
 						<input id="full_name" name="full_name" class="form-control">
 					</div>
+					-->
 					<div class="col-md-6">
 						<label for="role" class="form-label">Role *</label>
 						<select id="role" name="role" class="form-select" required>
@@ -51,7 +53,20 @@
 						<label for="password" class="form-label">Password *</label>
 						<input type="password" id="password" name="password" class="form-control" required>
 					</div>
+
+					<div class="col-md-6">
+						<label for="employee_id" class="form-label">Employee</label>
+						<select name="employee_id" id="employee_id" class="form-select">
+							<option value="">-- None --</option>
+							{% for emp in employees %}
+								<option value="{{ emp.employee_id }}">{{ emp.employee_id }} -- {{ emp.first_name }} {{ emp.last_name }}</option>
+							{% endfor %}
+						</select>
+					</div>
+
 				</div>
+
+
 
 				<div class="mt-4">
 					<button type="submit" class="btn btn-success">Add User</button>
@@ -103,7 +118,7 @@
 					<td>{{ user.user_id }}</td>
 					<td>{{ user.username }}</td>
 					<td>{{ user.email }}</td>
-					<td>{{ user.full_name or '—' }}</td>
+					<td>{{ user.employee.first_name }} {{ user.employee.last_name or 'SYSTEM'}}</td>
 					<td>{{ user.role }}</td>
 					<td>{{ user.created_at.strftime('%Y-%m-%d') if user.created_at else '—' }}</td>
 					<td>
@@ -116,8 +131,10 @@
 						   aria-controls="editUser{{ user.user_id }}">
 							Edit
 						</a>
-						<!-- Delete Button -->
+						<!-- Delete Button (Protect from deleting root account) -->
+						{% if user.user_id > 1 %}
 						<a href="/users/delete/{{ user.user_id }}" class="btn btn-sm btn-danger">Delete</a>
+						{% endif %}
 					</td>
 				</tr>
 
@@ -137,14 +154,19 @@
 									<input type="email" id="email_{{ user.user_id }}" name="email"
 										   class="form-control" value="{{ user.email }}" required>
 								</div>
+								<!-- DEPRECATED
 								<div class="col-md-4">
 									<label for="full_name_{{ user.user_id }}" class="form-label">Full Name</label>
 									<input type="text" id="full_name_{{ user.user_id }}" name="full_name"
 										   class="form-control" value="{{ user.full_name }}">
 								</div>
+								-->
 							</div>
 
+
 							<div class="row g-3 mt-2">
+								<!-- Protect root account from having permissions changed -->
+								{% if user.user_id > 1 %}
 								<div class="col-md-4">
 									<label for="role_{{ user.user_id }}" class="form-label">Role</label>
 									<select id="role_{{ user.user_id }}" name="role" class="form-select">
@@ -153,6 +175,7 @@
 										<option value="user" {% if user.role == 'user' %}selected{% endif %}>User</option>
 									</select>
 								</div>
+								{% endif %}
 								<div class="col-md-4">
 									<label for="password_{{ user.user_id }}" class="form-label">New Password (optional)</label>
 									<input type="password" id="password_{{ user.user_id }}" name="password"

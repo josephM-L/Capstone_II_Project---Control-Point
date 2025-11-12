@@ -1,7 +1,7 @@
 import csv
 from datetime import datetime
-from io import TextIOWrapper
-from flask import Blueprint, render_template, redirect, request, flash
+from io import TextIOWrapper, StringIO
+from flask import Blueprint, render_template, redirect, request, flash, Response
 from sqlalchemy import text
 from models import db, Asset, AssetType, AssetStatus, Location, Vendor, Employee
 from route_decorators import role_required
@@ -265,8 +265,46 @@ def edit_asset(asset_id):
 
 		return redirect("/assets")
 
-	# If GET request, render the edit page (optional)
+
 	return render_template("assets/edit_asset.html", asset=asset)
+
+
+# Export CSV
+@assets_bp.route("/assets/export", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def export_assets():
+	assets = Asset.query.all()
+	output = StringIO()
+	writer = csv.DictWriter(output, fieldnames=[
+		"asset_tag", "name", "description", "asset_type", "status",
+		"location", "assigned_to", "purchase_date", "purchase_cost",
+		"vendor", "warranty_expiry", "serial_number"
+	])
+	writer.writeheader()
+
+	for a in assets:
+		writer.writerow({
+			"asset_tag": a.asset_tag,
+			"name": a.name,
+			"description": a.description or "",
+			"asset_type": a.asset_type.name if a.asset_type else "",
+			"status": a.status.status_name if a.status else "",
+			"location": a.location.name if a.location else "",
+			# TODO Replace this with the employee id
+			"assigned_to": a.assigned_employee.email if a.assigned_employee else "",
+			"purchase_date": a.purchase_date.strftime("%Y-%m-%d") if a.purchase_date else "",
+			"purchase_cost": str(a.purchase_cost) if a.purchase_cost else "",
+			"vendor": a.vendor.name if a.vendor else "",
+			"warranty_expiry": a.warranty_expiry.strftime("%Y-%m-%d") if a.warranty_expiry else "",
+			"serial_number": a.serial_number or "",
+		})
+
+	output.seek(0)
+	return Response(
+		output.getvalue(),
+		mimetype="text/csv",
+		headers={"Content-Disposition": "attachment;filename=assets.csv"}
+	)
 
 
 # Search function

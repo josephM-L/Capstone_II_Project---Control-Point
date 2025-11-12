@@ -1,6 +1,6 @@
 import csv
-from io import TextIOWrapper
-from flask import Blueprint, render_template, redirect, request, flash
+from io import TextIOWrapper, StringIO
+from flask import Blueprint, render_template, redirect, request, flash, Response
 from sqlalchemy import text
 from models import db, Employee, Department
 from route_decorators import role_required
@@ -177,7 +177,24 @@ def edit_employee(employee_id):
 
 	return redirect("/employees")
 
+# Export CSV
+@employee_bp.route("/employees/export", methods=["GET", "POST"])
+@role_required("admin", "manager")
+def export_employees():
+	employees = Employee.query.all()
+	output = StringIO()
+	writer = csv.writer(output)
+	writer.writerow(["ID", "First Name", "Last Name", "Email", "Phone", "Department", "Role", "Status"])
 
+	for e in employees:
+		writer.writerow([e.employee_id, e.first_name, e.last_name, e.email, e.phone, e.department.name if e.department else "", e.role, e.status])
+
+	output.seek(0)
+	return Response(
+		output.getvalue(),
+		mimetype="text/csv",
+		headers={"Content-Disposition": "attachment;filename=employees.csv"}
+	)
 
 # Search function
 def search_for(search):

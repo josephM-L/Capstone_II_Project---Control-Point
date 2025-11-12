@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from werkzeug.security import generate_password_hash
 
-from models import db, User
+from models import db, User, Employee
 from route_decorators import role_required
 
 users_bp = Blueprint("users", __name__)
@@ -23,6 +23,7 @@ def users():
 		password = request.form.get("password", "").strip()
 		full_name = request.form.get("full_name", "").strip()
 		role = request.form.get("role", "user").strip()
+		employee_id = request.form.get("employee_id", "").strip() or None
 
 		hashed_pw = generate_password_hash(password)
 
@@ -35,9 +36,10 @@ def users():
 			new_user = User(
 				username=username,
 				email=email,
-				password_hash=hashed_pw,  # You can later replace with real hashing
+				password_hash=hashed_pw,
 				full_name=full_name,
-				role=role
+				role=role,
+				employee_id=employee_id
 			)
 			db.session.add(new_user)
 			db.session.commit()
@@ -50,6 +52,9 @@ def users():
 			return redirect("/users")
 
 	# DISPLAY TABLE ------------------------------------------------------------------------
+
+	# Get data from employees table
+	employees = Employee.query.all()
 
 	# Handle sorting
 	sort = request.args.get("sort", "user_id")
@@ -80,7 +85,8 @@ def users():
 		"users.html",
 		users=users,
 		sort=sort,
-		direction=direction
+		direction=direction,
+		employees=employees
 	)
 
 
@@ -91,6 +97,7 @@ def delete_user(user_id):
 	if record:
 		db.session.delete(record)
 		db.session.commit()
+		flash("User and related employee and assignments deleted successfully!", "success")
 	return redirect("/users")
 
 
