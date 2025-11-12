@@ -271,7 +271,7 @@ def edit_asset(asset_id):
 
 # Export CSV
 @assets_bp.route("/assets/export", methods=["GET", "POST"])
-@role_required("admin", "manager")
+@role_required("admin")
 def export_assets():
 	assets = Asset.query.all()
 	output = StringIO()

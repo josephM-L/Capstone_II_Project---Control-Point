@@ -1,4 +1,9 @@
+import traceback
+from collections import Counter
+
 from flask import Flask, render_template, jsonify, flash, session
+from werkzeug.utils import redirect
+
 from models import db, Location
 from AssetManagement.assets import assets_bp
 from AssetManagement.asset_types import asset_type_bp
@@ -14,6 +19,9 @@ from MiscPages.login import login_bp
 from MiscPages.manage_users import users_bp
 from sqlalchemy import func
 from models import Asset, AssetStatus, Department, Employee, Vendor, User, AssetType
+from route_decorators import role_required
+from misc_functions import *
+
 app = Flask(__name__)
 #TODO use something like import os to generate this later for security
 app.secret_key = "dev-secret"
@@ -77,10 +85,23 @@ def index():
             full_name = "SYSTEM"
             assets = []
 
-        return render_template('index.html', full_name=full_name, assets=assets)
+        # Calculate total and average purchase cost
+        val_query = Asset.query.all()
+        total_value = 0
+        for a in val_query:
+            total_value += a.purchase_cost
+            print(str(total_value))
+        average_value = total_value / len(val_query)
+
+        return render_template('index.html', full_name=full_name, assets=assets, total_value=total_value, average_value=average_value)
     else:
         return render_template('index.html', full_name="", assets=[])
 
+# Export the entire DB to CSV
+@app.route('/export')
+@role_required('admin')
+def export():
+    return export_db()
 
 
 
@@ -149,6 +170,7 @@ def assets_by_type():
         print("Exception in /chart-data/assets-by-type:")
         traceback.print_exc()
         return jsonify({"error": str(e)}), 500
+
 
 # Register all pages using blueprints
 app.register_blueprint(assets_bp)                # assets.py

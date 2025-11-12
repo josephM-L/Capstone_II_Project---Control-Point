@@ -12,7 +12,18 @@
 {% endwith %}
 
 
-<h1 class="text-center mt-3 mb-4">Dashboard</h1>
+
+{% if session['role'] == "admin" %}
+<h1 class="text-center mt-3 mb-1">Admin Dashboard</h1>
+<p class="text-center">You can manage all assets and users.</p>
+{% elif session['role'] == "manager" %}
+<h1 class="text-center mt-3 mb-1">Manager Dashboard</h1>
+<p class="text-center">You can view and assign assets to employees.</p>
+{% else %}
+<h1 class="text-center mt-3 mb-1">User Dashboard</h1>
+<p class="text-center">You can view your assigned assets only.</p>
+{% endif %}
+
 
 
 
@@ -204,8 +215,31 @@ loadVendorChart();
 loadTypeChart();
 </script>
 
+
+
 {% if session['role'] == 'admin' or session['role'] == 'manager' or session['role'] == 'user' %}
-<h2>Logged in as: {{ full_name }}</h2>
+<!--<h2>Logged in as: {{ full_name }}</h2>-->
+
+{% if session['role'] == 'manager' or session['role'] == 'admin' %}
+<div class="row mb-4">
+  <div class="col-md-6">
+    <div class="card text-white bg-primary">
+      <div class="card-body">
+        <h5 class="card-title">Total Cost of Assets</h5>
+        <p class="card-text">${{ "{:,.2f}".format(total_value) }}</p>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card text-white bg-success">
+      <div class="card-body">
+        <h5 class="card-title">Average Asset Cost</h5>
+        <p class="card-text">${{ "{:,.2f}".format(average_value) }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endif %}
 
 <div class="container mt-4">
 	<h3>Your Assigned Assets</h3>
@@ -234,18 +268,14 @@ loadTypeChart();
 </div>
 {% endif %}
 
+<!-- Export Entire DB Button -->
 {% if session['role'] == 'admin' %}
-	<h2>Admin Dashboard</h2>
-	<p>You can manage all assets and users.</p>
-
-{% elif session['role'] == 'manager' %}
-	<h2>Manager Dashboard</h2>
-	<p>You can view and assign assets to employees.</p>
-
-{% else %}
-	<h2>User Dashboard</h2>
-	<p>You can view your assigned assets only.</p>
+<a href="/export" class="btn btn-primary btn-sm">
+    <i class="bi bi-download"></i> Export Database
+</a>
 {% endif %}
+
+
 
 <!-- Testing User Perms -->
 <ul>
@@ -257,3 +287,4 @@ loadTypeChart();
 </ul>
 
 {% endblock %}
+
