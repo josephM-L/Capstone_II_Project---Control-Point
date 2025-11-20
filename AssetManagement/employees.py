@@ -5,9 +5,10 @@ from sqlalchemy import text
 from models import db, Employee, Department
 from route_decorators import role_required
 
+# Create Blueprint
 employee_bp = Blueprint("employee", __name__)
 
-
+# Define main page
 @employee_bp.route("/employees", methods=["GET", "POST"])
 @role_required("admin", "manager", "user")
 def employees():
@@ -16,43 +17,45 @@ def employees():
 		db.session.execute(text("ALTER TABLE employees AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
-		# Handle CSV upload
-		if "csv_file" in request.files and request.files["csv_file"].filename:
-			file = request.files["csv_file"]
-			try:
-				stream = TextIOWrapper(file.stream, encoding="utf-8")
-				csv_reader = csv.DictReader(stream)
-				count = 0
+		# ADD / UPDATE ------------------------------------------------------------------------
 
-				for row in csv_reader:
-					# Look up department by name if provided
-					department = (
-						Department.query.filter_by(name=row.get("department")).first()
-						if row.get("department") else None
-					)
-
-					# Build employee record
-					employee = Employee(
-						first_name=row.get("first_name", "").strip(),
-						last_name=row.get("last_name", "").strip(),
-						email=row.get("email", "").strip(),
-						phone=row.get("phone", "").strip(),
-						department_id=department.department_id if department else None,
-						role=row.get("role", "").strip(),
-						status=row.get("status", "Active").strip(),
-					)
-
-					db.session.add(employee)
-					count += 1
-
-				db.session.commit()
-				flash(f"Successfully imported {count} employees from CSV!", "success")
-
-			except Exception as e:
-				db.session.rollback()
-				flash(f"Error importing CSV: {e}", "danger")
-
-			return redirect("/employees")
+		# Handle CSV upload (Unused For Now)
+		# if "csv_file" in request.files and request.files["csv_file"].filename:
+		# 	file = request.files["csv_file"]
+		# 	try:
+		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
+		# 		csv_reader = csv.DictReader(stream)
+		# 		count = 0
+		#
+		# 		for row in csv_reader:
+		# 			# Look up department by name if provided
+		# 			department = (
+		# 				Department.query.filter_by(name=row.get("department")).first()
+		# 				if row.get("department") else None
+		# 			)
+		#
+		# 			# Build employee record
+		# 			employee = Employee(
+		# 				first_name=row.get("first_name", "").strip(),
+		# 				last_name=row.get("last_name", "").strip(),
+		# 				email=row.get("email", "").strip(),
+		# 				phone=row.get("phone", "").strip(),
+		# 				department_id=department.department_id if department else None,
+		# 				role=row.get("role", "").strip(),
+		# 				status=row.get("status", "Active").strip(),
+		# 			)
+		#
+		# 			db.session.add(employee)
+		# 			count += 1
+		#
+		# 		db.session.commit()
+		# 		flash(f"Successfully imported {count} employees from CSV!", "success")
+		#
+		# 	except Exception as e:
+		# 		db.session.rollback()
+		# 		flash(f"Error importing CSV: {e}", "danger")
+		#
+		# 	return redirect("/employees")
 
 		# Manual form entry
 		first_name = request.form.get("first_name", "").strip()
@@ -63,11 +66,12 @@ def employees():
 		role = request.form.get("role", "").strip()
 		status = request.form.get("status", "Active").strip()
 
-		# Validation
+		# Alert user if required fields are not filled out
 		if not first_name or not last_name or not email:
 			flash("First name, last name, and email are required!", "danger")
 			return redirect("/employees")
 
+		# Create new data entry
 		try:
 			department_id_val = int(department_id) if department_id else None
 
@@ -82,6 +86,8 @@ def employees():
 			)
 
 			db.session.add(new_employee)
+
+			# commit entry and alert user
 			db.session.commit()
 			flash("Employee added successfully!", "success")
 			return redirect("/employees")
@@ -124,7 +130,7 @@ def employees():
 	else:
 		employees = employees.order_by(sort_column.asc())
 
-	# Render table and forms
+	# Display table
 	return render_template(
 		"employees.html",
 		employees=employees,
@@ -133,7 +139,7 @@ def employees():
 		direction=direction
 	)
 
-
+# Define deletion page
 @employee_bp.route("/employees/delete/<int:employee_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_employee(employee_id):
@@ -143,11 +149,13 @@ def delete_employee(employee_id):
 		db.session.commit()
 	return redirect("/employees")
 
+# Define edit page
 @employee_bp.route("/employees/edit/<int:employee_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_employee(employee_id):
 	record = Employee.query.get_or_404(employee_id)
 
+	# Collect form data
 	first_name = request.form.get("first_name", "").strip()
 	last_name = request.form.get("last_name", "").strip()
 	email = request.form.get("email", "").strip()
@@ -156,6 +164,7 @@ def edit_employee(employee_id):
 	role = request.form.get("role", "").strip()
 	status = request.form.get("status", "Active")
 
+	# Basic validation
 	if not first_name or not last_name or not email:
 		flash("First name, last name, and email are required.", "danger")
 		return redirect("/employees")
@@ -169,6 +178,7 @@ def edit_employee(employee_id):
 		record.role = role
 		record.status = status
 
+		# Update table
 		db.session.commit()
 		flash("Employee updated successfully!", "success")
 	except Exception as e:
@@ -183,12 +193,26 @@ def edit_employee(employee_id):
 def export_employees():
 	employees = Employee.query.all()
 	output = StringIO()
-	writer = csv.writer(output)
-	writer.writerow(["ID", "First Name", "Last Name", "Email", "Phone", "Department", "Role", "Status"])
+	# Create writer and define field names for output file
+	writer = csv.DictWriter(output, fieldnames=[
+		"employee_id", "first_name", "last_name", "email", "phone", "department", "role", "status"])
+	writer.writeheader()
 
+	# Loop through all entries and add them to the output file
 	for e in employees:
-		writer.writerow([e.employee_id, e.first_name, e.last_name, e.email, e.phone, e.department.name if e.department else "", e.role, e.status])
+		writer.writerow({
+			"employee_id": e.employee_id,
+			"first_name": e.first_name,
+			"last_name": e.last_name,
+			"email": e.email,
+			"phone": e.phone or "",
+			#TODO Check uploading with department field
+			"department": e.department.name if e.department else "",
+			"role": e.role,
+			"status": e.status or "",
+		})
 
+	# Reset output pointer to read whole output
 	output.seek(0)
 	return Response(
 		output.getvalue(),

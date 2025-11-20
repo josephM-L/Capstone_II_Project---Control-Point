@@ -3,12 +3,13 @@ from datetime import datetime
 from io import TextIOWrapper, StringIO
 from flask import Blueprint, render_template, redirect, request, flash, Response
 from sqlalchemy import text
-from models import db, Asset, AssetType, AssetStatus, Location, Vendor, Employee
+from models import db, Asset, AssetType, AssetStatus, Location, Vendor, Employee, AssetAssignment
 from route_decorators import role_required
 
+# Create Blueprint
 assets_bp = Blueprint("assets", __name__)
 
-
+# Define main page
 @assets_bp.route("/assets", methods=["GET", "POST"])
 @role_required("admin", "manager", "user")
 def assets():
@@ -16,6 +17,8 @@ def assets():
 		# Reset auto increment
 		db.session.execute(text("ALTER TABLE assets AUTO_INCREMENT = 1;"))
 		db.session.commit()
+
+		# ADD / UPDATE ------------------------------------------------------------------------
 
 		# For uploading CSV
 		if "csv_file" in request.files and request.files["csv_file"].filename:
@@ -112,6 +115,7 @@ def assets():
 			flash("Asset tag and name are required!", "danger")
 			return redirect("/assets")
 
+		# Create new data entry
 		try:
 			purchase_date_parsed = (
 				datetime.strptime(purchase_date, "%Y-%m-%d").date()
@@ -140,7 +144,10 @@ def assets():
 				assigned_to=int(assigned_to) if assigned_to else None,
 			)
 
+			# Update table
 			db.session.add(new_asset)
+
+			# commit entry and alert user
 			db.session.commit()
 			flash("Asset added successfully!", "success")
 			return redirect("/assets")
@@ -194,8 +201,6 @@ def assets():
 	else:
 		assets = assets.order_by(sort_column.asc())
 
-	#assets = assets.all()
-
 	# Display table of all assets and data entry forms
 	return render_template(
 		"assets.html",
@@ -209,7 +214,7 @@ def assets():
 		direction=direction
 	)
 
-
+# Define deletion page
 @assets_bp.route("/assets/delete/<int:asset_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset(asset_id):
@@ -219,54 +224,55 @@ def delete_asset(asset_id):
 		db.session.commit()
 	return redirect("/assets")
 
+# Define edit page
 @assets_bp.route("/assets/edit/<int:asset_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset(asset_id):
-	asset = Asset.query.get_or_404(asset_id)
+	record = Asset.query.get_or_404(asset_id)
 
-	if request.method == "POST":
-		asset_tag = request.form.get("asset_tag", "").strip()
-		name = request.form.get("name", "").strip()
-		description = request.form.get("description", "").strip()
-		asset_type_id = request.form.get("asset_type_id")
-		status_id = request.form.get("status_id")
-		location_id = request.form.get("location_id")
-		assigned_to = request.form.get("assigned_to")
-		purchase_date = request.form.get("purchase_date")
-		purchase_cost = request.form.get("purchase_cost")
-		vendor_id = request.form.get("vendor_id")
-		warranty_expiry = request.form.get("warranty_expiry")
-		serial_number = request.form.get("serial_number", "").strip()
+	# Collect form data
+	asset_tag = request.form.get("asset_tag", "").strip()
+	name = request.form.get("name", "").strip()
+	description = request.form.get("description", "").strip()
+	asset_type_id = request.form.get("asset_type_id")
+	status_id = request.form.get("status_id")
+	location_id = request.form.get("location_id")
+	assigned_to = request.form.get("assigned_to")
+	purchase_date = request.form.get("purchase_date")
+	purchase_cost = request.form.get("purchase_cost")
+	vendor_id = request.form.get("vendor_id")
+	warranty_expiry = request.form.get("warranty_expiry")
+	serial_number = request.form.get("serial_number", "").strip()
 
-		# Basic validation
-		if not asset_tag or not name:
-			flash("Asset tag and name cannot be empty.", "danger")
-			return redirect("/assets")
-
-		try:
-			asset.asset_tag = asset_tag
-			asset.name = name
-			asset.description = description or None
-			asset.asset_type_id = asset_type_id or None
-			asset.status_id = status_id or None
-			asset.location_id = location_id or None
-			asset.assigned_to = assigned_to or None
-			asset.purchase_date = purchase_date or None
-			asset.purchase_cost = purchase_cost or None
-			asset.vendor_id = vendor_id or None
-			asset.warranty_expiry = warranty_expiry or None
-			asset.serial_number = serial_number or None
-
-			db.session.commit()
-			flash("Asset updated successfully!", "success")
-		except Exception as e:
-			db.session.rollback()
-			flash(f"Error updating asset: {e}", "danger")
-
+	# Basic validation
+	if not asset_tag or not name:
+		flash("Asset tag and name cannot be empty.", "danger")
 		return redirect("/assets")
 
+	try:
+		record.asset_tag = asset_tag
+		record.name = name
+		record.description = description or None
+		record.asset_type_id = asset_type_id or None
+		record.status_id = status_id or None
+		record.location_id = location_id or None
+		record.assigned_to = assigned_to or None
+		record.purchase_date = purchase_date or None
+		record.purchase_cost = purchase_cost or None
+		record.vendor_id = vendor_id or None
+		record.warranty_expiry = warranty_expiry or None
+		record.serial_number = serial_number or None
 
-	return render_template("assets/edit_asset.html", asset=asset)
+		# Update table
+		db.session.commit()
+		flash("Asset updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating asset: {e}", "danger")
+
+	return redirect("/assets")
+
+
 
 
 # Export CSV
@@ -275,6 +281,7 @@ def edit_asset(asset_id):
 def export_assets():
 	assets = Asset.query.all()
 	output = StringIO()
+	# Create writer and define field names for output file
 	writer = csv.DictWriter(output, fieldnames=[
 		"asset_tag", "name", "description", "asset_type", "status",
 		"location", "assigned_to", "purchase_date", "purchase_cost",
@@ -282,6 +289,7 @@ def export_assets():
 	])
 	writer.writeheader()
 
+	# Loop through all entries and add them to the output file
 	for a in assets:
 		writer.writerow({
 			"asset_tag": a.asset_tag,
@@ -290,8 +298,7 @@ def export_assets():
 			"asset_type": a.asset_type.name if a.asset_type else "",
 			"status": a.status.status_name if a.status else "",
 			"location": a.location.name if a.location else "",
-			# TODO Replace this with the employee id
-			"assigned_to": a.assigned_employee.email if a.assigned_employee else "",
+			"assigned_to": a.assigned_to if a.assigned_to else "",
 			"purchase_date": a.purchase_date.strftime("%Y-%m-%d") if a.purchase_date else "",
 			"purchase_cost": str(a.purchase_cost) if a.purchase_cost else "",
 			"vendor": a.vendor.name if a.vendor else "",
@@ -299,6 +306,7 @@ def export_assets():
 			"serial_number": a.serial_number or "",
 		})
 
+	# Reset output pointer to read whole output
 	output.seek(0)
 	return Response(
 		output.getvalue(),
@@ -309,21 +317,22 @@ def export_assets():
 
 # Search function
 def search_for(search):
-	query = Asset.query.join(Vendor, isouter=True).join(Location, isouter=True).join(AssetType, isouter=True)
+	# Create a join to query Assets, Vendor, Location, AssetType, and AssetStatus tables
+	query = Asset.query.join(Vendor, isouter=True).join(Location, isouter=True).join(AssetType, isouter=True).join(AssetStatus, isouter=True)
 	if search:
 		search_pattern = f"%{search}%"
 		query = query.filter(
-			db.or_(
-				Asset.asset_tag.ilike(search_pattern),
-				Asset.name.ilike(search_pattern),
-				Asset.description.ilike(search_pattern),
-				Asset.serial_number.ilike(search_pattern),
-				db.cast(Asset.purchase_date, db.String).ilike(search_pattern),
-				db.cast(Asset.purchase_cost, db.String).ilike(search_pattern),
-				db.cast(Asset.warranty_expiry, db.String).ilike(search_pattern),
-				Vendor.name.ilike(search_pattern),
-				Location.name.ilike(search_pattern),
-				AssetType.name.ilike(search_pattern)
-			)
+			(Asset.asset_tag.ilike(search_pattern)) |
+			(Asset.name.ilike(search_pattern)) |
+			(Asset.description.ilike(search_pattern)) |
+			(Asset.serial_number.ilike(search_pattern)) |
+			(Asset.purchase_date.ilike(search_pattern)) |
+			(Asset.purchase_cost.ilike(search_pattern)) |
+			(Asset.warranty_expiry.ilike(search_pattern)) |
+			(AssetStatus.status_name.ilike(search_pattern)) |
+			(Vendor.name.ilike(search_pattern)) |
+			(Location.name.ilike(search_pattern)) |
+			(AssetType.name.ilike(search_pattern))
+
 		)
 	return query

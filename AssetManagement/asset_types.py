@@ -3,9 +3,10 @@ from sqlalchemy import text
 from models import db, AssetType
 from route_decorators import role_required
 
+# Create Blueprint
 asset_type_bp = Blueprint("asset_type", __name__)
 
-
+# Define main page
 @asset_type_bp.route("/asset_type", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def asset_types():
@@ -14,6 +15,7 @@ def asset_types():
 		db.session.execute(text("ALTER TABLE asset_types AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
+		# ADD / UPDATE ------------------------------------------------------------------------
 		# Manual form entry
 		name = request.form.get("name", "").strip()
 		category = request.form.get("category", "").strip()
@@ -72,7 +74,7 @@ def asset_types():
 		direction=direction
 	)
 
-
+# Define deletion page
 @asset_type_bp.route("/asset_type/delete/<int:asset_type_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset_type(asset_type_id):
@@ -82,16 +84,18 @@ def delete_asset_type(asset_type_id):
 		db.session.commit()
 	return redirect("/asset_type")
 
-
+# Define edit page
 @asset_type_bp.route("/asset_type/edit/<int:asset_type_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset_type(asset_type_id):
 	record = AssetType.query.get_or_404(asset_type_id)
 
+	# Collect form data
 	new_name = request.form.get("name", "").strip()
 	new_category = request.form.get("category", "").strip()
 	new_description = request.form.get("description", "").strip()
 
+	# Basic validation
 	if not new_name:
 		flash("Type name cannot be empty.", "danger")
 		return redirect("/asset_type")
@@ -100,6 +104,8 @@ def edit_asset_type(asset_type_id):
 		record.name = new_name
 		record.category = new_category
 		record.description = new_description
+
+		# Update table
 		db.session.commit()
 		flash("Asset type updated successfully!", "success")
 	except Exception as e:
@@ -107,7 +113,6 @@ def edit_asset_type(asset_type_id):
 		flash(f"Error updating asset type: {e}", "danger")
 
 	return redirect("/asset_type")
-
 
 
 # Search function

@@ -3,17 +3,19 @@ from sqlalchemy import text
 from models import db, Vendor
 from route_decorators import role_required
 
+# Create Blueprint
 vendor_bp = Blueprint("vendor", __name__)
 
-
+# Define main page
 @vendor_bp.route("/vendors", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def vendors():
-	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
 		# Reset auto increment
 		db.session.execute(text("ALTER TABLE vendors AUTO_INCREMENT = 1;"))
 		db.session.commit()
+
+		# ADD / UPDATE ------------------------------------------------------------------------
 
 		# Manual form entry
 		name = request.form.get("name", "").strip()
@@ -22,10 +24,12 @@ def vendors():
 		email = request.form.get("email", "").strip()
 		address = request.form.get("address", "").strip()
 
+		# Alert user if required fields are not filled out
 		if not name:
 			flash("Vendor name is required!", "danger")
 			return redirect("/vendors")
 
+		# Create new data entry
 		try:
 			new_vendor = Vendor(
 				name=name,
@@ -36,6 +40,8 @@ def vendors():
 			)
 
 			db.session.add(new_vendor)
+
+			# commit entry and alert user
 			db.session.commit()
 			flash("Vendor added successfully!", "success")
 			return redirect("/vendors")
@@ -72,6 +78,7 @@ def vendors():
 	else:
 		vendors = vendors.order_by(sort_column.asc())
 
+	# Display table
 	return render_template(
 		"vendors.html",
 		vendors=vendors,
@@ -79,7 +86,7 @@ def vendors():
 		direction=direction
 	)
 
-
+# Define deletion page
 @vendor_bp.route("/vendors/delete/<int:vendor_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_vendor(vendor_id):
@@ -89,13 +96,13 @@ def delete_vendor(vendor_id):
 		db.session.commit()
 	return redirect("/vendors")
 
-
+# Define edit page
 @vendor_bp.route("/vendors/edit/<int:vendor_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_vendor(vendor_id):
 	record = Vendor.query.get_or_404(vendor_id)
 
-	# Get updated form data
+	# Collect form data
 	new_name = request.form.get("name", "").strip()
 	new_contact_name = request.form.get("contact_name", "").strip()
 	new_phone = request.form.get("phone", "").strip()
@@ -108,13 +115,13 @@ def edit_vendor(vendor_id):
 		return redirect("/vendors")
 
 	try:
-		# Apply updates
 		record.name = new_name
 		record.contact_name = new_contact_name
 		record.phone = new_phone
 		record.email = new_email
 		record.address = new_address
 
+		# Update table
 		db.session.commit()
 		flash("Vendor updated successfully!", "success")
 

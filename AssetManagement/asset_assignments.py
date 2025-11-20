@@ -5,9 +5,10 @@ from sqlalchemy import text
 from models import db, AssetAssignment, Asset, Employee
 from route_decorators import role_required
 
+# Create Blueprint
 asset_assignment_bp = Blueprint("asset_assignment", __name__)
 
-
+# Define main page
 @asset_assignment_bp.route("/asset_assignments", methods=["GET", "POST"])
 @role_required("admin", "manager", "user")
 def asset_assignments():
@@ -16,46 +17,50 @@ def asset_assignments():
 		db.session.execute(text("ALTER TABLE asset_assignments AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
-		# Handle CSV upload
-		if "csv_file" in request.files and request.files["csv_file"].filename:
-			file = request.files["csv_file"]
-			try:
-				stream = TextIOWrapper(file.stream, encoding="utf-8")
-				csv_reader = csv.DictReader(stream)
-				count = 0
+		# ADD / UPDATE ------------------------------------------------------------------------
 
-				for row in csv_reader:
-					# Find asset and employee by ID or name if available
-					asset = (
-						Asset.query.filter_by(asset_id=row.get("asset_id")).first()
-						if row.get("asset_id") else None
-					)
-					employee = (
-						Employee.query.filter_by(email=row.get("employee_email")).first()
-						if row.get("employee_email") else None
-					)
-
-					if not asset or not employee:
-						continue
-
-					assignment = AssetAssignment(
-						asset_id=asset.asset_id,
-						employee_id=employee.employee_id,
-						assigned_date=row.get("assigned_date"),
-						returned_date=row.get("returned_date") or None,
-					)
-
-					db.session.add(assignment)
-					count += 1
-
-				db.session.commit()
-				flash(f"Successfully imported {count} assignments from CSV!", "success")
-
-			except Exception as e:
-				db.session.rollback()
-				flash(f"Error importing CSV: {e}", "danger")
-
-			return redirect("/asset_assignments")
+		# Handle CSV upload (Unused For Now)
+		# if "csv_file" in request.files and request.files["csv_file"].filename:
+		# 	file = request.files["csv_file"]
+		# 	try:
+		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
+		# 		csv_reader = csv.DictReader(stream)
+		# 		count = 0
+		#
+		# 		for row in csv_reader:
+		# 			# Find asset and employee by ID or name if available
+		# 			asset = (
+		# 				Asset.query.filter_by(asset_id=row.get("asset_id")).first()
+		# 				if row.get("asset_id") else None
+		# 			)
+		# 			employee = (
+		# 				Employee.query.filter_by(email=row.get("employee_email")).first()
+		# 				if row.get("employee_email") else None
+		# 			)
+		#
+		# 			if not asset or not employee:
+		# 				continue
+		#
+		# 			# Create data entry for addition
+		# 			assignment = AssetAssignment(
+		# 				asset_id=asset.asset_id,
+		# 				employee_id=employee.employee_id,
+		# 				assigned_date=row.get("assigned_date"),
+		# 				returned_date=row.get("returned_date") or None,
+		# 			)
+		#
+		# 			# Add new item and iterate
+		# 			db.session.add(assignment)
+		# 			count += 1
+		#
+		# 		db.session.commit()
+		# 		flash(f"Successfully imported {count} assignments from CSV!", "success")
+		#
+		# 	except Exception as e:
+		# 		db.session.rollback()
+		# 		flash(f"Error importing CSV: {e}", "danger")
+		#
+		# 	return redirect("/asset_assignments")
 
 		# Manual form entry
 		asset_id = request.form.get("asset_id")
@@ -63,10 +68,12 @@ def asset_assignments():
 		assigned_date = request.form.get("assigned_date")
 		returned_date = request.form.get("returned_date") or None
 
+		# Alert user if required fields are not filled out
 		if not asset_id or not employee_id or not assigned_date:
 			flash("Asset, employee, and assigned date are required!", "danger")
 			return redirect("/asset_assignments")
 
+		# Create new data entry
 		try:
 			new_assignment = AssetAssignment(
 				asset_id=int(asset_id),
@@ -77,11 +84,12 @@ def asset_assignments():
 
 			db.session.add(new_assignment)
 
-			# Update Assets Table
+			# Update asset table
 			asset = Asset.query.get(asset_id)
 			if asset:
 				asset.assigned_to = employee_id
 
+			# commit entry and alert user
 			db.session.commit()
 			flash("Asset assignment added successfully!", "success")
 			return redirect("/asset_assignments")
@@ -120,6 +128,7 @@ def asset_assignments():
 	else:
 		assignments = assignments.order_by(sort_column.asc())
 
+	# Display table
 	return render_template(
 		"asset_assignments.html",
 		assignments=assignments,
@@ -129,7 +138,7 @@ def asset_assignments():
 		direction=direction
 	)
 
-
+# Define deletion page
 @asset_assignment_bp.route("/asset_assignments/delete/<int:assignment_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset_assignment(assignment_id):
@@ -139,6 +148,7 @@ def delete_asset_assignment(assignment_id):
 		db.session.commit()
 	return redirect("/asset_assignments")
 
+# Define edit page
 @asset_assignment_bp.route("/asset_assignments/edit/<int:assignment_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset_assignment(assignment_id):
@@ -161,7 +171,7 @@ def edit_asset_assignment(assignment_id):
 		record.assigned_date = assigned_date
 		record.returned_date = returned_date or None
 
-		# Update Assets Table
+		# Update table
 		asset = Asset.query.get(asset_id)
 		if asset:
 			asset.assigned_to = employee_id
@@ -177,7 +187,7 @@ def edit_asset_assignment(assignment_id):
 
 # Search function
 def search_for(search):
-	# Create a join to query assetassignment, asset, and employee tables
+	# Create a join to query asset_assignment, asset, and employee tables
 	query = AssetAssignment.query \
 		.join(Asset, AssetAssignment.asset_id == Asset.asset_id) \
 		.join(Employee, AssetAssignment.employee_id == Employee.employee_id)

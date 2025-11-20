@@ -5,10 +5,10 @@ from sqlalchemy import text
 from models import db, AssetMaintenance, Asset
 from route_decorators import role_required
 
-
+# Create Blueprint
 asset_maintenance_bp = Blueprint("asset_maintenance", __name__)
 
-
+# Define main page
 @asset_maintenance_bp.route("/asset_maintenance", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def asset_maintenance():
@@ -17,44 +17,45 @@ def asset_maintenance():
 		db.session.execute(text("ALTER TABLE asset_maintenance AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
-		# Handle CSV upload
-		if "csv_file" in request.files and request.files["csv_file"].filename:
-			file = request.files["csv_file"]
-			try:
-				stream = TextIOWrapper(file.stream, encoding="utf-8")
-				csv_reader = csv.DictReader(stream)
-				count = 0
-
-				for row in csv_reader:
-					# Find asset by ID or tag
-					asset = (
-						Asset.query.filter_by(asset_id=row.get("asset_id")).first()
-						if row.get("asset_id") else None
-					)
-
-					if not asset:
-						continue
-
-					record = AssetMaintenance(
-						asset_id=asset.asset_id,
-						maintenance_date=row.get("maintenance_date"),
-						description=row.get("description"),
-						performed_by=row.get("performed_by"),
-						cost=row.get("cost") or None,
-						next_due_date=row.get("next_due_date") or None,
-					)
-
-					db.session.add(record)
-					count += 1
-
-				db.session.commit()
-				flash(f"Successfully imported {count} maintenance records from CSV!", "success")
-
-			except Exception as e:
-				db.session.rollback()
-				flash(f"Error importing CSV: {e}", "danger")
-
-			return redirect("/asset_maintenance")
+		# ADD / UPDATE ------------------------------------------------------------------------
+		# Handle CSV upload (Unused For Now)
+		# if "csv_file" in request.files and request.files["csv_file"].filename:
+		# 	file = request.files["csv_file"]
+		# 	try:
+		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
+		# 		csv_reader = csv.DictReader(stream)
+		# 		count = 0
+		#
+		# 		for row in csv_reader:
+		# 			# Find asset by ID or tag
+		# 			asset = (
+		# 				Asset.query.filter_by(asset_id=row.get("asset_id")).first()
+		# 				if row.get("asset_id") else None
+		# 			)
+		#
+		# 			if not asset:
+		# 				continue
+		#
+		# 			record = AssetMaintenance(
+		# 				asset_id=asset.asset_id,
+		# 				maintenance_date=row.get("maintenance_date"),
+		# 				description=row.get("description"),
+		# 				performed_by=row.get("performed_by"),
+		# 				cost=row.get("cost") or None,
+		# 				next_due_date=row.get("next_due_date") or None,
+		# 			)
+		#
+		# 			db.session.add(record)
+		# 			count += 1
+		#
+		# 		db.session.commit()
+		# 		flash(f"Successfully imported {count} maintenance records from CSV!", "success")
+		#
+		# 	except Exception as e:
+		# 		db.session.rollback()
+		# 		flash(f"Error importing CSV: {e}", "danger")
+		#
+		# 	return redirect("/asset_maintenance")
 
 		# Manual form entry
 		asset_id = request.form.get("asset_id")
@@ -126,7 +127,7 @@ def asset_maintenance():
 		direction=direction
 	)
 
-
+# Define deletion page
 @asset_maintenance_bp.route("/asset_maintenance/delete/<int:maintenance_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset_maintenance(maintenance_id):
@@ -136,6 +137,7 @@ def delete_asset_maintenance(maintenance_id):
 		db.session.commit()
 	return redirect("/asset_maintenance")
 
+# Define edit page
 @asset_maintenance_bp.route("/asset_maintenance/edit/<int:maintenance_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset_maintenance(maintenance_id):
@@ -160,6 +162,7 @@ def edit_asset_maintenance(maintenance_id):
 		record.cost = cost or None
 		record.next_due_date = next_due_date or None
 
+		# Update table
 		db.session.commit()
 		flash("Maintenance record updated successfully!", "success")
 	except Exception as e:
@@ -169,9 +172,9 @@ def edit_asset_maintenance(maintenance_id):
 	return redirect("/asset_maintenance")
 
 
-
 # Search function
 def search_for(search):
+	# Create a join to query AssetMaintenance and Asset tables
 	query = AssetMaintenance.query.join(Asset, AssetMaintenance.asset_id == Asset.asset_id)
 
 	if search:

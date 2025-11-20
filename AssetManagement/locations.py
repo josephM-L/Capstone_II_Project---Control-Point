@@ -3,17 +3,19 @@ from sqlalchemy import text
 from models import db, Location
 from route_decorators import role_required
 
+# Create Blueprint
 location_bp = Blueprint("location", __name__)
 
-
+# Define main page
 @location_bp.route("/locations", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def locations():
-	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
 		# Reset auto increment
 		db.session.execute(text("ALTER TABLE locations AUTO_INCREMENT = 1;"))
 		db.session.commit()
+
+		# ADD / UPDATE ------------------------------------------------------------------------
 
 		# Manual form entry
 		name = request.form.get("name", "").strip()
@@ -21,10 +23,12 @@ def locations():
 		city = request.form.get("city", "").strip()
 		country = request.form.get("country", "").strip()
 
+		# Alert user if required fields are not filled out
 		if not name:
 			flash("Location name is required!", "danger")
 			return redirect("/locations")
 
+		# Create new data entry
 		try:
 			new_location = Location(
 				name=name,
@@ -34,6 +38,8 @@ def locations():
 			)
 
 			db.session.add(new_location)
+
+			# commit entry and alert user
 			db.session.commit()
 			flash("Location added successfully!", "success")
 			return redirect("/locations")
@@ -69,6 +75,7 @@ def locations():
 	else:
 		locations = locations.order_by(sort_column.asc())
 
+	# Display table
 	return render_template(
 		"locations.html",
 		locations=locations,
@@ -76,7 +83,7 @@ def locations():
 		direction=direction
 	)
 
-
+# Define deletion page
 @location_bp.route("/locations/delete/<int:location_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_location(location_id):
@@ -86,17 +93,19 @@ def delete_location(location_id):
 		db.session.commit()
 	return redirect("/locations")
 
-
+# Define edit page
 @location_bp.route("/locations/edit/<int:location_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_location(location_id):
 	record = Location.query.get_or_404(location_id)
 
+	# Collect form data
 	new_name = request.form.get("name", "").strip()
 	new_address = request.form.get("address", "").strip()
 	new_city = request.form.get("city", "").strip()
 	new_country = request.form.get("country", "").strip()
 
+	# Basic validation
 	if not new_name:
 		flash("Location name cannot be empty.", "danger")
 		return redirect("/locations")
@@ -107,6 +116,7 @@ def edit_location(location_id):
 		record.city = new_city
 		record.country = new_country
 
+		# Update table
 		db.session.commit()
 		flash("Location updated successfully!", "success")
 	except Exception as e:

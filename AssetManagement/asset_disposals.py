@@ -5,10 +5,10 @@ from sqlalchemy import text
 from models import db, AssetDisposal, Asset
 from route_decorators import role_required
 
-
+# Create Blueprint
 asset_disposal_bp = Blueprint("asset_disposal", __name__)
 
-
+# Define main page
 @asset_disposal_bp.route("/asset_disposals", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def asset_disposals():
@@ -17,43 +17,44 @@ def asset_disposals():
 		db.session.execute(text("ALTER TABLE asset_disposals AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
-		# Handle CSV upload
-		if "csv_file" in request.files and request.files["csv_file"].filename:
-			file = request.files["csv_file"]
-			try:
-				stream = TextIOWrapper(file.stream, encoding="utf-8")
-				csv_reader = csv.DictReader(stream)
-				count = 0
-
-				for row in csv_reader:
-					# Find asset by ID or tag
-					asset = (
-						Asset.query.filter_by(asset_id=row.get("asset_id")).first()
-						if row.get("asset_id") else None
-					)
-
-					if not asset:
-						continue
-
-					disposal = AssetDisposal(
-						asset_id=asset.asset_id,
-						disposal_date=row.get("disposal_date"),
-						method=row.get("method"),
-						sale_value=row.get("sale_value") or None,
-						notes=row.get("notes") or None,
-					)
-
-					db.session.add(disposal)
-					count += 1
-
-				db.session.commit()
-				flash(f"Successfully imported {count} disposals from CSV!", "success")
-
-			except Exception as e:
-				db.session.rollback()
-				flash(f"Error importing CSV: {e}", "danger")
-
-			return redirect("/asset_disposals")
+		# ADD / UPDATE ------------------------------------------------------------------------
+		# Handle CSV upload (Unused For Now)
+		# if "csv_file" in request.files and request.files["csv_file"].filename:
+		# 	file = request.files["csv_file"]
+		# 	try:
+		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
+		# 		csv_reader = csv.DictReader(stream)
+		# 		count = 0
+		#
+		# 		for row in csv_reader:
+		# 			# Find asset by ID or tag
+		# 			asset = (
+		# 				Asset.query.filter_by(asset_id=row.get("asset_id")).first()
+		# 				if row.get("asset_id") else None
+		# 			)
+		#
+		# 			if not asset:
+		# 				continue
+		#
+		# 			disposal = AssetDisposal(
+		# 				asset_id=asset.asset_id,
+		# 				disposal_date=row.get("disposal_date"),
+		# 				method=row.get("method"),
+		# 				sale_value=row.get("sale_value") or None,
+		# 				notes=row.get("notes") or None,
+		# 			)
+		#
+		# 			db.session.add(disposal)
+		# 			count += 1
+		#
+		# 		db.session.commit()
+		# 		flash(f"Successfully imported {count} disposals from CSV!", "success")
+		#
+		# 	except Exception as e:
+		# 		db.session.rollback()
+		# 		flash(f"Error importing CSV: {e}", "danger")
+		#
+		# 	return redirect("/asset_disposals")
 
 		# Manual form entry
 		asset_id = request.form.get("asset_id")
@@ -122,7 +123,7 @@ def asset_disposals():
 		direction=direction
 	)
 
-
+# Define deletion page
 @asset_disposal_bp.route("/asset_disposals/delete/<int:disposal_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset_disposal(disposal_id):
@@ -132,41 +133,42 @@ def delete_asset_disposal(disposal_id):
 		db.session.commit()
 	return redirect("/asset_disposals")
 
+# Define edit page
 @asset_disposal_bp.route("/asset_disposals/edit/<int:disposal_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset_disposal(disposal_id):
 	record = AssetDisposal.query.get_or_404(disposal_id)
 
-	if request.method == "POST":
-		disposal_date = request.form.get("disposal_date")
-		method = request.form.get("method")
-		sale_value = request.form.get("sale_value")
-		notes = request.form.get("notes", "").strip()
+	# Collect form data
+	disposal_date = request.form.get("disposal_date")
+	method = request.form.get("method")
+	sale_value = request.form.get("sale_value")
+	notes = request.form.get("notes", "").strip()
 
-		if not disposal_date or not method:
-			flash("Disposal date and method cannot be empty.", "danger")
-			return redirect("/asset_disposals")
-
-		try:
-			record.disposal_date = disposal_date
-			record.method = method
-			record.sale_value = sale_value or None
-			record.notes = notes or None
-
-			db.session.commit()
-			flash("Asset disposal record updated successfully!", "success")
-		except Exception as e:
-			db.session.rollback()
-			flash(f"Error updating disposal record: {e}", "danger")
-
+	# Basic validation
+	if not disposal_date or not method:
+		flash("Disposal date and method cannot be empty.", "danger")
 		return redirect("/asset_disposals")
 
-	return render_template("disposals/edit_disposal.html", disposal=record)
+	try:
+		record.disposal_date = disposal_date
+		record.method = method
+		record.sale_value = sale_value or None
+		record.notes = notes or None
 
+		# Update table
+		db.session.commit()
+		flash("Asset disposal record updated successfully!", "success")
+	except Exception as e:
+		db.session.rollback()
+		flash(f"Error updating disposal record: {e}", "danger")
+
+	return redirect("/asset_disposals")
 
 
 # Search function
 def search_for(search):
+	# Create a join to query AssetDisposal and Asset tables
 	query = AssetDisposal.query.join(Asset, AssetDisposal.asset_id == Asset.asset_id)
 
 	if search:

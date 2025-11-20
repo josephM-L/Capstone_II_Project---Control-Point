@@ -3,18 +3,19 @@ from sqlalchemy import text
 from models import db, AssetStatus
 from route_decorators import role_required
 
+# Create Blueprint
 asset_status_bp = Blueprint("asset_status", __name__)
 
-
+# Define main page
 @asset_status_bp.route("/asset_status", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def asset_statuses():
-	# ADD / UPDATE ------------------------------------------------------------------------
 	if request.method == "POST":
 		# Reset auto increment
 		db.session.execute(text("ALTER TABLE asset_statuses AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
+		# ADD / UPDATE ------------------------------------------------------------------------
 		# Manual form entry
 		status_name = request.form.get("status_name", "").strip()
 
@@ -66,7 +67,7 @@ def asset_statuses():
 		direction=direction
 	)
 
-
+# Define deletion page
 @asset_status_bp.route("/asset_status/delete/<int:status_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def delete_asset_status(status_id):
@@ -76,18 +77,24 @@ def delete_asset_status(status_id):
 		db.session.commit()
 	return redirect("/asset_status")
 
+# Define edit page
 @asset_status_bp.route("/asset_status/edit/<int:status_id>", methods=["GET", "POST"])
 @role_required("admin", "manager")
 def edit_asset_status(status_id):
 	record = AssetStatus.query.get_or_404(status_id)
 
+	# Collect form data
 	new_name = request.form.get("status_name", "").strip()
+
+	# Basic validation
 	if not new_name:
 		flash("Status name cannot be empty.", "danger")
 		return redirect("/asset_status")
 
 	try:
 		record.status_name = new_name
+
+		# Update table
 		db.session.commit()
 		flash("Asset status updated successfully!", "success")
 	except Exception as e:
