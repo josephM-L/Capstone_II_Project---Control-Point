@@ -57,6 +57,19 @@ def export_db():
         zip_file.writestr("employees.csv", output.getvalue())
         output.close()
 
+        # --- DEPARTMENTS ---
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(["department_id", "name", "manager_id"])
+        for d in Department.query.all():
+            writer.writerow([
+                d.department_id,
+                d.name,
+                d.manager_id
+            ])
+        zip_file.writestr("departments.csv", output.getvalue())
+        output.close()
+
         # --- ASSET TYPES ---
         output = io.StringIO()
         writer = csv.writer(output)
@@ -132,12 +145,13 @@ def export_db():
         # --- ASSET MAINTENANCES ---
         output = io.StringIO()
         writer = csv.writer(output)
-        writer.writerow(["maintenance_id","asset_id","maintenance_date","performed_by","cost","next_due_date"])
+        writer.writerow(["maintenance_id","asset_id","maintenance_date","description","performed_by","cost","next_due_date"])
         for a in AssetMaintenance.query.all():
             writer.writerow([
                 a.maintenance_id,
                 a.asset_id,
                 a.maintenance_date,
+                a.description,
                 a.performed_by,
                 a.cost,
                 a.next_due_date

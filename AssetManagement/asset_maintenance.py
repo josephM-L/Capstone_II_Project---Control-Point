@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 from io import TextIOWrapper
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
@@ -18,44 +19,58 @@ def asset_maintenance():
 		db.session.commit()
 
 		# ADD / UPDATE ------------------------------------------------------------------------
-		# Handle CSV upload (Unused For Now)
-		# if "csv_file" in request.files and request.files["csv_file"].filename:
-		# 	file = request.files["csv_file"]
-		# 	try:
-		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
-		# 		csv_reader = csv.DictReader(stream)
-		# 		count = 0
-		#
-		# 		for row in csv_reader:
-		# 			# Find asset by ID or tag
-		# 			asset = (
-		# 				Asset.query.filter_by(asset_id=row.get("asset_id")).first()
-		# 				if row.get("asset_id") else None
-		# 			)
-		#
-		# 			if not asset:
-		# 				continue
-		#
-		# 			record = AssetMaintenance(
-		# 				asset_id=asset.asset_id,
-		# 				maintenance_date=row.get("maintenance_date"),
-		# 				description=row.get("description"),
-		# 				performed_by=row.get("performed_by"),
-		# 				cost=row.get("cost") or None,
-		# 				next_due_date=row.get("next_due_date") or None,
-		# 			)
-		#
-		# 			db.session.add(record)
-		# 			count += 1
-		#
-		# 		db.session.commit()
-		# 		flash(f"Successfully imported {count} maintenance records from CSV!", "success")
-		#
-		# 	except Exception as e:
-		# 		db.session.rollback()
-		# 		flash(f"Error importing CSV: {e}", "danger")
-		#
-		# 	return redirect("/asset_maintenance")
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# Look up related foreign keys by name if given
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY EXIST IN THEIR RESPECTIVE TABLES
+					asset = (
+						Asset.query.filter_by(asset_id=row.get("asset_id")).first()
+						if row.get("asset_id") else None
+					)
+
+					# Parse dates and numbers
+					maintenance_date = (
+						datetime.strptime(row.get("maintenance_date"), "%Y-%m-%d").date()
+						if row.get("maintenance_date") else None
+					)
+					next_due_date = (
+						datetime.strptime(row.get("next_due_date"), "%Y-%m-%d").date()
+						if row.get("next_due_date") else None
+					)
+					cost = (
+						float(row.get("cost")) if row.get("cost") else None
+					)
+
+					# Only add maintenance records if the asset exists and maintenance_date is valid
+					if asset and maintenance_date:
+						maintenance = AssetMaintenance(
+							asset_id=asset.asset_id,
+							maintenance_date=maintenance_date,
+							description=row.get("description"),
+							performed_by=row.get("performed_by"),
+							cost=cost,
+							next_due_date=next_due_date,
+						)
+						db.session.add(maintenance)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} asset maintenance records from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/asset_maintenance")
 
 		# Manual form entry
 		asset_id = request.form.get("asset_id")

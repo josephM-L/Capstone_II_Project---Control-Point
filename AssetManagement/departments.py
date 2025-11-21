@@ -1,3 +1,6 @@
+import csv
+from io import TextIOWrapper
+
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, Department, Employee
@@ -16,6 +19,46 @@ def departments():
 		db.session.commit()
 
 		# ADD / UPDATE ------------------------------------------------------------------------
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# Look up manager by email if provided
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY DO NOT ALREADY EXIST
+					manager = (
+						Employee.query.filter_by(email=row.get("manager_email")).first()
+						if row.get("manager_email") else None
+					)
+
+					existing_department = (
+						Department.query.filter_by(name=row.get("name")).first()
+						if row.get("name") else None
+					)
+
+					# Only add department if it does not exist already
+					if not existing_department and row.get("name"):
+						department = Department(
+							name=row.get("name").strip(),
+							manager_id=manager.employee_id if manager else None,
+						)
+						db.session.add(department)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} departments from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/departments")
 
 		# Manual form entry
 		name = request.form.get("name", "").strip()

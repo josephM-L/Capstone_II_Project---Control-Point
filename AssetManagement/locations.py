@@ -1,3 +1,6 @@
+import csv
+from io import TextIOWrapper
+
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, Location
@@ -16,6 +19,43 @@ def locations():
 		db.session.commit()
 
 		# ADD / UPDATE ------------------------------------------------------------------------
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY DO NOT ALREADY EXIST
+					existing_location = (
+						Location.query.filter_by(name=row.get("name")).first()
+						if row.get("name") else None
+					)
+
+					# Only add locations if they do not already exist
+					if not existing_location and row.get("name"):
+						location = Location(
+							name=row.get("name", "").strip(),
+							address=row.get("address"),
+							city=row.get("city"),
+							country=row.get("country"),
+						)
+						db.session.add(location)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} locations from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/locations")
+
 
 		# Manual form entry
 		name = request.form.get("name", "").strip()

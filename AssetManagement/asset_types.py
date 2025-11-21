@@ -1,3 +1,6 @@
+import csv
+from io import TextIOWrapper
+
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
 from models import db, AssetType
@@ -16,6 +19,45 @@ def asset_types():
 		db.session.commit()
 
 		# ADD / UPDATE ------------------------------------------------------------------------
+
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# Check for existing asset type by name to avoid duplicates
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY DO NOT ALREADY EXIST
+					asset_type = (
+						AssetType.query.filter_by(name=row.get("name").strip()).first()
+						if row.get("name") else None
+					)
+
+					# Only add asset type if it does not already exist
+					if not asset_type:
+						asset_type = AssetType(
+							name=row.get("name").strip(),
+							category=row.get("category")
+							if row.get("category") in ["Tangible", "Intangible"] else None,
+							description=row.get("description"),
+						)
+						db.session.add(asset_type)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} asset types from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/asset_type")
+
 		# Manual form entry
 		name = request.form.get("name", "").strip()
 		category = request.form.get("category", "").strip()

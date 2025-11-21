@@ -31,6 +31,20 @@
 <div class="collapse" id="addDepartmentSection">
 	<h2>Add Department</h2>
 
+	<!-- CSV Upload -->
+	<div class="card mb-4">
+		<div class="card-body">
+			<h5>Upload from CSV</h5>
+			<form action="{{ url_for('department.departments') }}" method="POST" enctype="multipart/form-data">
+				<div class="mb-3">
+					<input type="file" class="form-control" id="csv_file" name="csv_file" accept=".csv" required>
+					<div class="form-text">Only .csv files are supported.</div>
+				</div>
+				<button type="submit" class="btn btn-primary">Upload CSV</button>
+			</form>
+		</div>
+	</div>
+
 	<div class="card mb-4">
 		<div class="card-body">
 			<form method="post">

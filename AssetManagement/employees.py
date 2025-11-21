@@ -19,43 +19,51 @@ def employees():
 
 		# ADD / UPDATE ------------------------------------------------------------------------
 
-		# Handle CSV upload (Unused For Now)
-		# if "csv_file" in request.files and request.files["csv_file"].filename:
-		# 	file = request.files["csv_file"]
-		# 	try:
-		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
-		# 		csv_reader = csv.DictReader(stream)
-		# 		count = 0
-		#
-		# 		for row in csv_reader:
-		# 			# Look up department by name if provided
-		# 			department = (
-		# 				Department.query.filter_by(name=row.get("department")).first()
-		# 				if row.get("department") else None
-		# 			)
-		#
-		# 			# Build employee record
-		# 			employee = Employee(
-		# 				first_name=row.get("first_name", "").strip(),
-		# 				last_name=row.get("last_name", "").strip(),
-		# 				email=row.get("email", "").strip(),
-		# 				phone=row.get("phone", "").strip(),
-		# 				department_id=department.department_id if department else None,
-		# 				role=row.get("role", "").strip(),
-		# 				status=row.get("status", "Active").strip(),
-		# 			)
-		#
-		# 			db.session.add(employee)
-		# 			count += 1
-		#
-		# 		db.session.commit()
-		# 		flash(f"Successfully imported {count} employees from CSV!", "success")
-		#
-		# 	except Exception as e:
-		# 		db.session.rollback()
-		# 		flash(f"Error importing CSV: {e}", "danger")
-		#
-		# 	return redirect("/employees")
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# Look up related foreign keys by name if given
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY DO NOT ALREADY EXIST
+					department = (
+						Department.query.filter_by(name=row.get("department")).first()
+						if row.get("department") else None
+					)
+
+					existing_employee = (
+						Employee.query.filter_by(email=row.get("email")).first()
+						if row.get("email") else None
+					)
+
+					# Only add employees if they do not already exist
+					if not existing_employee and row.get("email"):
+						employee = Employee(
+							first_name=row.get("first_name", "").strip(),
+							last_name=row.get("last_name", "").strip(),
+							email=row.get("email", "").strip(),
+							phone=row.get("phone"),
+							role=row.get("role"),
+							status=row.get("status") if row.get("status") else "Active",
+							department_id=department.department_id if department else None,
+						)
+						db.session.add(employee)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} employees from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/employees")
 
 		# Manual form entry
 		first_name = request.form.get("first_name", "").strip()
@@ -195,7 +203,7 @@ def export_employees():
 	output = StringIO()
 	# Create writer and define field names for output file
 	writer = csv.DictWriter(output, fieldnames=[
-		"employee_id", "first_name", "last_name", "email", "phone", "department", "role", "status"])
+		"employee_id", "first_name", "last_name", "email", "phone", "department_id", "role", "status"])
 	writer.writeheader()
 
 	# Loop through all entries and add them to the output file
@@ -206,8 +214,7 @@ def export_employees():
 			"last_name": e.last_name,
 			"email": e.email,
 			"phone": e.phone or "",
-			#TODO Check uploading with department field
-			"department": e.department.name if e.department else "",
+			"department_id": e.department or "",
 			"role": e.role,
 			"status": e.status or "",
 		})

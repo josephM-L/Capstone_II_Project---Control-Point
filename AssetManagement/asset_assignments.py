@@ -1,4 +1,5 @@
 import csv
+from datetime import datetime
 from io import TextIOWrapper
 from flask import Blueprint, render_template, redirect, request, flash
 from sqlalchemy import text
@@ -19,48 +20,57 @@ def asset_assignments():
 
 		# ADD / UPDATE ------------------------------------------------------------------------
 
-		# Handle CSV upload (Unused For Now)
-		# if "csv_file" in request.files and request.files["csv_file"].filename:
-		# 	file = request.files["csv_file"]
-		# 	try:
-		# 		stream = TextIOWrapper(file.stream, encoding="utf-8")
-		# 		csv_reader = csv.DictReader(stream)
-		# 		count = 0
-		#
-		# 		for row in csv_reader:
-		# 			# Find asset and employee by ID or name if available
-		# 			asset = (
-		# 				Asset.query.filter_by(asset_id=row.get("asset_id")).first()
-		# 				if row.get("asset_id") else None
-		# 			)
-		# 			employee = (
-		# 				Employee.query.filter_by(email=row.get("employee_email")).first()
-		# 				if row.get("employee_email") else None
-		# 			)
-		#
-		# 			if not asset or not employee:
-		# 				continue
-		#
-		# 			# Create data entry for addition
-		# 			assignment = AssetAssignment(
-		# 				asset_id=asset.asset_id,
-		# 				employee_id=employee.employee_id,
-		# 				assigned_date=row.get("assigned_date"),
-		# 				returned_date=row.get("returned_date") or None,
-		# 			)
-		#
-		# 			# Add new item and iterate
-		# 			db.session.add(assignment)
-		# 			count += 1
-		#
-		# 		db.session.commit()
-		# 		flash(f"Successfully imported {count} assignments from CSV!", "success")
-		#
-		# 	except Exception as e:
-		# 		db.session.rollback()
-		# 		flash(f"Error importing CSV: {e}", "danger")
-		#
-		# 	return redirect("/asset_assignments")
+		# For uploading CSV
+		if "csv_file" in request.files and request.files["csv_file"].filename:
+			file = request.files["csv_file"]
+			try:
+				stream = TextIOWrapper(file.stream, encoding="utf-8")
+				csv_reader = csv.DictReader(stream)
+				count = 0
+
+				for row in csv_reader:
+					# Look up related foreign keys by name if given
+					# THESE ITEMS WILL ONLY BE ADDED IF THEY EXIST IN THEIR RESPECTIVE TABLES
+					asset = (
+						Asset.query.filter_by(asset_id=row.get("asset_id")).first()
+						if row.get("asset_id") else None
+					)
+					employee = (
+						Employee.query.filter_by(employee_id=row.get("employee_id")).first()
+						if row.get("employee_id") else None
+					)
+
+					# Parse dates
+					assigned_date = (
+						datetime.strptime(row.get("assigned_date"), "%Y-%m-%d").date()
+						if row.get("assigned_date") else None
+					)
+					returned_date = (
+						datetime.strptime(row.get("returned_date"), "%Y-%m-%d").date()
+						if row.get("returned_date") else None
+					)
+
+					# Only add assignment records if the referenced items exist
+					if asset and employee and assigned_date:
+						assignment = AssetAssignment(
+							asset_id=asset.asset_id,
+							employee_id=employee.employee_id,
+							assigned_date=assigned_date,
+							returned_date=returned_date,
+						)
+						db.session.add(assignment)
+						count += 1
+
+				# Commit additions to DB
+				db.session.commit()
+				flash(f"Successfully imported {count} asset assignments from CSV!", "success")
+
+			# Handle errors and exceptions
+			except Exception as e:
+				db.session.rollback()
+				flash(f"Error importing CSV: {e}", "danger")
+
+			return redirect("/asset_assignments")
 
 		# Manual form entry
 		asset_id = request.form.get("asset_id")
