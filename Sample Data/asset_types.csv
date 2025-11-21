@@ -1,0 +1,22 @@
+asset_type_id,name,category,description
+1,Laptop,Tangible,Portable computers for staff and point-of-sale support
+2,Desktop PC,Tangible,Back-office workstations for accounting and admin
+3,Server,Tangible,On-premise servers for local services and inventory systems
+4,Point of Sale Terminal,Tangible,Register terminals with card readers and displays
+5,Receipt Printer,Tangible,Serial/USB receipt printers for POS stations
+6,Cash Drawer,Tangible,Secure cash storage for point-of-sale terminals
+7,Shelving & Racks,Tangible,Store shelving units and merchandise racks
+8,Display Fixture,Tangible,In-store product displays and mannequins
+9,Barcode Scanner,Tangible,Handheld or fixed scanners for inventory and checkout
+10,Label Printer,Tangible,Printers for price tags and barcode labels
+11,Handheld Mobile Scanner,Tangible,Portable inventory devices for stock counts
+12,Security Camera,Tangible,CCTV cameras for loss prevention
+13,Access Control System,Tangible,Card readers and door controllers
+14,Inventory Stock (SKU),Tangible,Physical merchandise items tracked as inventory
+15,Store Vehicle,Tangible,Delivery van or utility vehicle used by the store
+16,Software License,Intangible,POS and back-office software subscriptions
+17,Cloud Service Subscription,Intangible,Cloud-hosted services for e-commerce and analytics
+18,Website Domain Name,Intangible,Registered domain for online storefront
+19,Digital Marketing Account,Intangible,Ad accounts and social media management tools
+20,Warranty Contract,Intangible,Extended warranties and service agreements
+21,Furniture,Tangible,Miscellaneous furniture

@@ -145,6 +145,7 @@
 			<tr class="collapse" id="editDepartment{{ department.department_id }}">
 				<td colspan="3">
 					<div class="card card-body">
+
 						<form method="post" action="/departments/edit/{{ department.department_id }}">
 						<div class="row g-3">
 							<div class="col-md-6">
@@ -171,11 +172,10 @@
 							</div>
 						</div>
 
-	<div class="mt-3">
-		<button type="submit" class="btn btn-sm btn-success">Save</button>
-	</div>
-</form>
-
+							<div class="mt-3">
+								<button type="submit" class="btn btn-sm btn-success">Save</button>
+							</div>
+						</form>
 
 					</div>
 				</td>

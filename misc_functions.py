@@ -8,7 +8,7 @@ from models import Asset, AssetStatus, Employee, AssetAssignment, AssetType, Ass
 
 
 def export_db():
-    # Create an in-memory bytes buffer for the zip
+    # Create a buffer for the zip
     zip_buffer = io.BytesIO()
 
     with zipfile.ZipFile(zip_buffer, "w", zipfile.ZIP_DEFLATED) as zip_file:

@@ -37,12 +37,12 @@ host: str = "47.199.71.84"
 port: int = 3306
 
 db_link: str = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
+#TODO USE THIS CODE FOR PRODUCTION!
+#host: str = "172.0.0.1"
+#db_link: str = f"mysql+pymysql://{user}:{password}@{host}/{db_name}"
 
-print(db_link)
+#print(db_link)
 
-
-#TODO this needs to be obscured and changed later for security purposes
-#TODO we need to dynamically swap this to admin or user accounts
 app.config["SQLALCHEMY_DATABASE_URI"] = db_link
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -193,5 +193,4 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()  # Ensures tables exist
 
-    #TODO TURN DEBUG OFF FOR OUR TEST DEPLOYMENT DURING PRESENTATION!!!
-    app.run(debug=True)
+    app.run(debug=False)

@@ -18,6 +18,7 @@ def assets():
 		db.session.execute(text("ALTER TABLE assets AUTO_INCREMENT = 1;"))
 		db.session.commit()
 
+
 		# ADD / UPDATE ------------------------------------------------------------------------
 
 		# For uploading CSV
@@ -29,29 +30,6 @@ def assets():
 				count = 0
 
 				for row in csv_reader:
-					# Look up related foreign keys by name if given
-					# THESE ITEMS WILL ONLY BE ADDED IF THEY EXIST IN THEIR RESPECTIVE TABLES
-					asset_type = (
-						AssetType.query.filter_by(name=row.get("asset_type")).first()
-						if row.get("asset_type") else None
-					)
-					status = (
-						AssetStatus.query.filter_by(status_name=row.get("status")).first()
-						if row.get("status") else None
-					)
-					location = (
-						Location.query.filter_by(name=row.get("location")).first()
-						if row.get("location") else None
-					)
-					vendor = (
-						Vendor.query.filter_by(name=row.get("vendor")).first()
-						if row.get("vendor") else None
-					)
-					employee = (
-						Employee.query.filter_by(email=row.get("assigned_to")).first()
-						if row.get("assigned_to") else None
-					)
-
 					# Parse dates and numbers
 					purchase_date = (
 						datetime.strptime(row.get("purchase_date"), "%Y-%m-%d").date()
@@ -74,11 +52,11 @@ def assets():
 						purchase_cost=purchase_cost,
 						serial_number=row.get("serial_number"),
 						warranty_expiry=warranty_expiry,
-						asset_type_id=asset_type.asset_type_id if asset_type else None,
-						status_id=status.status_id if status else None,
-						location_id=location.location_id if location else None,
-						vendor_id=vendor.vendor_id if vendor else None,
-						assigned_to=employee.employee_id if employee else None,
+						asset_type_id=int(row.get("asset_type_id")) if row.get("asset_type_id") else None,
+						status_id=int(row.get("status_id")) if row.get("status_id") else None,
+						location_id=int(row.get("location_id")) if row.get("location_id") else None,
+						vendor_id=int(row.get("vendor_id")) if row.get("vendor_id") else None,
+						assigned_to=int(row.get("assigned_to")) if row.get("assigned_to") else None,
 					)
 					db.session.add(asset)
 					count += 1

@@ -1,5 +1,5 @@
 from functools import wraps
-from flask import session, redirect, url_for, flash
+from flask import session, redirect, flash
 
 def role_required(*roles):
 	def wrapper(fn):

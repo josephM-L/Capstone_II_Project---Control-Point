@@ -1,0 +1,35 @@
+disposal_id,asset_id,disposal_date,method,sale_value,notes
+1,67,2025-06-15,Sold,250.00,Old laptop sold to staff
+2,68,2025-06-18,Recycled,,Recycled at local e-waste center
+3,69,2025-06-20,Scrapped,,Broken beyond repair
+4,70,2025-06-22,Donated,,Donated to community center
+5,71,2025-06-25,Sold,180.00,Used printer sold
+6,72,2025-06-28,Recycled,,Recycled plastic parts
+7,73,2025-07-01,Scrapped,,Damaged monitor
+8,74,2025-07-03,Donated,,Donated to charity
+9,75,2025-07-05,Sold,400.00,Old server sold
+10,76,2025-07-08,Recycled,,Recycled wiring
+11,77,2025-07-10,Scrapped,,Broken desk
+12,78,2025-07-12,Donated,,Donated chairs to school
+13,79,2025-07-15,Sold,120.00,Old projector
+14,80,2025-07-18,Recycled,,E-waste recycling
+15,81,2025-07-20,Scrapped,,Printer jammed beyond repair
+16,82,2025-07-22,Donated,,Donated to non-profit
+17,83,2025-07-25,Sold,75.00,Keyboard set
+18,84,2025-07-28,Recycled,,Recycled cables
+19,85,2025-07-30,Scrapped,,Old filing cabinet
+20,86,2025-08-02,Donated,,Donated office supplies
+21,87,2025-08-05,Sold,300.00,Used workstation
+22,88,2025-08-08,Recycled,,Recycled electronics
+23,89,2025-08-10,Scrapped,,Broken chair
+24,90,2025-08-12,Donated,,Donation to charity
+25,91,2025-08-15,Sold,220.00,Old monitor
+26,92,2025-08-18,Recycled,,Recycled batteries
+27,93,2025-08-20,Scrapped,,Damaged shelving unit
+28,94,2025-08-22,Donated,,Donation to local school
+29,95,2025-08-25,Sold,150.00,Printer
+30,96,2025-08-28,Recycled,,Recycled components
+31,97,2025-08-30,Scrapped,,Broken laptop
+32,98,2025-09-02,Donated,,Donated to non-profit
+33,99,2025-09-05,Sold,350.00,Server unit
+34,100,2025-09-08,Recycled,,E-waste recycling

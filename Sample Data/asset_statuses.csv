@@ -1,0 +1,14 @@
+status_id,status_name
+1,Available
+2,In Use
+3,In Storage
+4,Under Maintenance
+5,Stolen
+6,Lost
+7,Disposed
+8,Pending Disposal
+9,In Transit
+10,Awaiting Repair
+11,Testing
+12,Decommissioned
+13,Reserved

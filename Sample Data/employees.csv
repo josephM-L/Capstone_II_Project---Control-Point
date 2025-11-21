@@ -1,0 +1,31 @@
+employee_id,first_name,last_name,email,phone,department_id,role,status
+1,John,Mason,Jmason@email.com,(305) 412-8790,8,Marketing Manager,Active
+2,Kate,Williams,Kwilliams@email.com,(305) 629-1844,3,HR Specialist,Inactive
+3,Ron,O'Connor,Roconnor@email.com,(786) 502-3371,6,IT Technician,Active
+4,Jim,Richards,Jrichards@email.com,(305) 771-9422,5,Security Guard,Active
+5,Sarah,May,Smay@email.com,(786) 640-5539,7,Customer Support Rep,Active
+6,Gustavo,Hernandez,Ghernandez@email.com,(305) 884-6920,4,Accountant,Active
+7,Emily,Clark,Eclark@email.com,(786) 514-2301,1,Administrative Assistant,Active
+8,David,Ramirez,Dramirez@email.com,(305) 760-9921,14,Warehouse Supervisor,Active
+9,Linda,Chen,Lchen@email.com,(786) 372-1448,12,Legal Assistant,Active
+10,Anthony,Lopez,Alopez@email.com,(305) 218-7734,2,Sales Representative,Active
+11,Rebecca,Stone,Rstone@email.com,(786) 421-6690,11,Training Coordinator,Active
+12,Michael,Turner,Mturner@email.com,(305) 664-0218,1,Office Manager,Active
+13,Victor,Santana,Vsantana@email.com,(786) 339-5577,9,Logistics Coordinator,Active
+14,Donna,Bishop,Dbishop@email.com,(305) 551-9031,7,Support Supervisor,Active
+15,Jason,White,Jwhite@email.com,(305) 881-4310,6,System Administrator,Active
+16,Olivia,Nguyen,Oneguyen@email.com,(786) 442-9851,8,Marketing Specialist,Active
+17,Robert,Hall,Rhall@email.com,(305) 230-7129,9,Procurement Specialist,Active
+18,Cynthia,Reeves,Creeves@email.com,(786) 780-6630,3,HR Manager,Active
+19,Patrick,Greene,Pgreene@email.com,(305) 902-4770,4,Financial Analyst,Active
+20,Erica,Brown,Ebrown@email.com,(305) 889-2234,2,Sales Manager,Active
+21,Thomas,King,Tking@email.com,(786) 509-7814,5,Security Supervisor,Active
+22,Amanda,Fields,Afields@email.com,(305) 721-4521,13,PR Specialist,Active
+23,Marcus,Young,Myoung@email.com,(786) 661-1405,9,Fleet Manager,Active
+24,Isabella,Rossi,Irossi@email.com,(305) 713-8001,11,Training Assistant,Active
+25,Carlos,Martinez,Cmartinez@email.com,(786) 293-4127,14,Warehouse Worker,Active
+26,Beth,Anderson,Banderson@email.com,(305) 274-8890,8,Creative Lead,Active
+27,Samuel,Ortega,SOrtega@email.com,(786) 550-3992,9,Procurement Clerk,Active
+28,Henry,Foster,Hfoster@email.com,(305) 931-0024,12,Paralegal,Active
+29,Laura,Stephens,Lstephens@email.com,(786) 210-5574,6,Network Engineer,Active
+30,Brandon,Cruz,Bcruz@email.com,(305) 744-6635,7,Call Center Agent,Inactive

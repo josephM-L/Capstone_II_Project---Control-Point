@@ -24,33 +24,6 @@ def login():
     return render_template("login.html")
 
 
-@login_bp.route("/login/register", methods=["GET", "POST"])
-def register():
-    if request.method == "POST":
-        username = request.form.get("username", "").strip()
-        email = request.form.get("email", "").strip()
-        password = request.form.get("password")
-
-        if not username or not email or not password:
-            flash("All fields are required!", "danger")
-            return redirect(url_for("login.register"))
-
-        hashed_pw = generate_password_hash(password)
-
-        try:
-            new_user = User(username=username, email=email, password_hash=hashed_pw)
-            db.session.add(new_user)
-            db.session.commit()
-            flash("Account created successfully! Please log in.", "success")
-            return redirect(url_for("login.login"))
-        except Exception as e:
-            db.session.rollback()
-            flash(f"Error creating account: {e}", "danger")
-            return redirect(url_for("login.create_account"))
-
-    return render_template("register.html")
-
-
 @login_bp.route("/logout")
 def logout():
     session.clear()

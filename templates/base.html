@@ -24,7 +24,6 @@
   <div class="container-fluid">
     <a class="navbar-brand" href="/">Control Point</a>
     <ul class="navbar-nav flex-row">
-      <!-- <li class="nav-item"><a class="nav-link px-2" href="/">Home</a></li>  -->
       {% if session['role'] == 'admin' or session['role'] == 'manager' or session['role'] == 'user' %}
       <li class="nav-item"><a class="nav-link px-2" href="{{ url_for('assets.assets') }}">Manage Assets</a></li>
       {% endif %}

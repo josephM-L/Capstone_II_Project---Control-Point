@@ -1,0 +1,15 @@
+department_id,name,manager_id
+1,Administration,12
+2,Sales,20
+3,Human Resources,18
+4,Finance & Accounting,6
+5,Security,21
+6,Information Technology,15
+7,Customer Support,22
+8,Marketing,1
+9,Logistics,13
+10,Procurement,27
+11,Training & Development,11
+12,Legal,28
+13,Public Relations,22
+14,Warehouse Operations,8

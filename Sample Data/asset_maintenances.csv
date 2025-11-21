@@ -1,0 +1,31 @@
+maintenance_id,asset_id,maintenance_date,description,performed_by,cost,next_due_date
+1,3,2025-01-15,Replaced battery,TechSource Solutions,150.00,2026-01-15
+2,7,2025-02-10,Screen repair,Precision Audio Visual,220.00,2026-02-10
+3,12,2025-02-28,Software update,OfficeWorks Supply Co.,50.00,2025-08-28
+4,5,2025-03-12,Keyboard replacement,Gulf Coast IT Hardware,80.00,2025-09-12
+5,19,2025-03-25,Hard drive upgrade,BrightLine Networking,180.00,2026-03-25
+6,8,2025-04-01,Network configuration,Eagle Office Essentials,120.00,2026-04-01
+7,21,2025-04-18,Printer maintenance,Quantum Display Systems,90.00,2025-10-18
+8,15,2025-05-05,OS reinstall,Horizon Computing Depot,200.00,2026-05-05
+9,27,2025-05-20,Replaced power supply,Alpha Industrial Supply,160.00,2026-05-20
+10,4,2025-06-01,Security patch installation,Crestview Electronics Distribution,75.00,2025-12-01
+11,18,2025-06-15,Memory upgrade,Metro IT & Wire Solutions,100.00,2026-06-15
+12,2,2025-06-25,Software license renewal,ClearWave Fiber Systems,60.00,2026-06-25
+13,9,2025-07-03,Replaced monitor,ProMedia Stage & Lighting Gear,210.00,2026-07-03
+14,14,2025-07-18,Cleaned cooling system,Titan Equipment Wholesale,50.00,2026-07-18
+15,11,2025-08-05,Replaced network cable,NovaTech Procurement Group,30.00,2026-08-05
+16,6,2025-08-12,Updated firmware,TechSource Solutions,40.00,2026-08-12
+17,20,2025-08-25,Printer ink replacement,OfficeWorks Supply Co.,25.00,2025-11-25
+18,22,2025-09-05,Reinstalled security software,Gulf Coast IT Hardware,70.00,2026-09-05
+19,28,2025-09-15,Keyboard and mouse replacement,BrightLine Networking,60.00,2026-09-15
+20,23,2025-09-28,Replaced external hard drive,Eagle Office Essentials,130.00,2026-09-28
+21,16,2025-10-06,Network switch maintenance,Quantum Display Systems,150.00,2026-10-06
+22,25,2025-10-12,Updated graphics card,Horizon Computing Depot,250.00,2026-10-12
+23,10,2025-10-20,Replaced faulty RAM,Alpha Industrial Supply,120.00,2026-10-20
+24,13,2025-11-02,Installed antivirus,Crestview Electronics Distribution,50.00,2026-11-02
+25,17,2025-11-18,Cleaned internal components,Metro IT & Wire Solutions,40.00,2026-11-18
+26,1,2025-11-25,Replaced laptop battery,ClearWave Fiber Systems,150.00,2026-11-25
+27,24,2025-12-05,Network router configuration,ProMedia Stage & Lighting Gear,80.00,2026-12-05
+28,29,2025-12-15,OS update,Titan Equipment Wholesale,60.00,2026-12-15
+29,26,2025-12-22,Printer maintenance,NovaTech Procurement Group,90.00,2026-12-22
+30,30,2025-12-28,Hard drive replacement,TechSource Solutions,200.00,2026-12-28

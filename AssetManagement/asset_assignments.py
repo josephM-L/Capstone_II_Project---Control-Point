@@ -61,6 +61,11 @@ def asset_assignments():
 						db.session.add(assignment)
 						count += 1
 
+					# Update asset table
+					asset = Asset.query.get(asset.asset_id)
+					if asset:
+						asset.assigned_to = employee.employee_id
+
 				# Commit additions to DB
 				db.session.commit()
 				flash(f"Successfully imported {count} asset assignments from CSV!", "success")
