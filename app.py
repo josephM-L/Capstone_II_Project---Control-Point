@@ -33,13 +33,11 @@ app.secret_key = "dev-secret"
 user: str = "asset_admin"
 password: str = "CapstoneII"
 db_name: str = "asset_management"
-host: str = "47.199.71.84"
+#host: str = "IPADDRESS"
+host: str = "172.0.0.1"
 port: int = 3306
 
 db_link: str = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
-#TODO USE THIS CODE FOR PRODUCTION!
-#host: str = "172.0.0.1"
-#db_link: str = f"mysql+pymysql://{user}:{password}@{host}/{db_name}"
 
 #print(db_link)
 
