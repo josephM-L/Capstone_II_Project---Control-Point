@@ -90,7 +90,11 @@ def index():
         for a in val_query:
             total_value += a.purchase_cost
             print(str(total_value))
-        average_value = total_value / len(val_query)
+
+        if len(val_query > 0):
+            average_value = total_value / len(val_query)
+        else:
+            average_value = 0
 
         return render_template('index.html', full_name=full_name, assets=assets, total_value=total_value, average_value=average_value)
     else:
