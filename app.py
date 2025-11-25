@@ -34,7 +34,7 @@ user: str = "asset_admin"
 password: str = "CapstoneII"
 db_name: str = "asset_management"
 #host: str = "IPADDRESS"
-host: str = "172.0.0.1"
+host: str = "127.0.0.1"
 port: int = 3306
 
 db_link: str = f"mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
