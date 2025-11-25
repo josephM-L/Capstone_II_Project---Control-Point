@@ -33,12 +33,12 @@ app.secret_key = "dev-secret"
 user: str = "asset_admin"
 password: str = "CapstoneII"
 db_name: str = "asset_management"
-#host: str = "47.199.71.84"
+#host: str = "IPADDRESS"
 host: str = "127.0.0.1"
 port: int = 3306
 
-db_link = "mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
-#db_link = "mysql+pymysql://asset_admin:CapstoneII@127.0.0.1:3306/asset_management"
+#db_link = "mysql+pymysql://{user}:{password}@{host}:{port}/{db_name}"
+db_link = "mysql+pymysql://asset_admin:CapstoneII@127.0.0.1:3306/asset_management"
 
 print(db_link)
 
