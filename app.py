@@ -33,7 +33,7 @@ app.secret_key = "dev-secret"
 user: str = "asset_admin"
 password: str = "CapstoneII"
 db_name: str = "asset_management"
-#host: str = "IPADDRESS"
+#host: str = "IPADDRES"
 host: str = "127.0.0.1"
 port: int = 3306
 
